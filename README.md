@@ -1,8 +1,24 @@
-# irc
+# IRC Setup Guide
 
-In current terminal:
-make; ./irc
+## Running the IRC Server
 
-In another terminal:
+In the current terminal, compile and start the server:
+```
+make
+./irc
+```
+
+## Connecting with irssi
+
+In another terminal, open **irssi** and connect to the server:
+```
 irssi
-/connect 127.0.0.1 6667
+/connect localhost 4444
+```
+
+## Disconnecting
+
+To disconnect from the server, use:
+```
+/disconnect
+```
