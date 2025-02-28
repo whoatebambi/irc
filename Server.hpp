@@ -6,7 +6,7 @@
 /*   By: florencecousergue <florencecousergue@st    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/15 12:29:01 by fcouserg          #+#    #+#             */
-/*   Updated: 2025/02/27 16:36:57 by florencecou      ###   ########.fr       */
+/*   Updated: 2025/02/28 17:27:59 by florencecou      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,12 +27,14 @@
 class Server {
 	private:
 		int port;
-		int server_fdsocket;
-		static bool Signal; //-> static boolean for signal
-		std::vector<struct pollfd> fdTable; //-> vector of pollfd
-		std::vector<Client> clients;
+		int server_fd;
+		static bool Signal; // static boolean for signal
+		std::vector<struct pollfd> fdTable; // Stores only the file descriptors needed for poll() (fd, events, revents)
+		std::vector<Client> clientsTable; // Stores detailed client information (fd, ip, nickname, messages, status...)
 		struct sockaddr_in cliadd;
-		struct pollfd new_cli;
+		struct pollfd newClient;
+
+		
 		
 	public:
 		Server();

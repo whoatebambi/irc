@@ -6,13 +6,14 @@
 /*   By: florencecousergue <florencecousergue@st    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/15 12:29:01 by fcouserg          #+#    #+#             */
-/*   Updated: 2025/02/27 16:23:34 by florencecou      ###   ########.fr       */
+/*   Updated: 2025/02/28 16:28:45 by florencecou      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
 #include <iostream>
+#include <string>
 
 class Client {
 	private:
