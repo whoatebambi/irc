@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: florencecousergue <florencecousergue@st    +#+  +:+       +#+        */
+/*   By: jpointil <jpointil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/15 12:29:01 by fcouserg          #+#    #+#             */
-/*   Updated: 2025/02/28 17:35:08 by florencecou      ###   ########.fr       */
+/*   Updated: 2025/03/06 16:37:58 by jpointil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ Server &Server::operator=(Server const &src){
 		this->port = src.port;
 		this->server_fd = src.server_fd;
 		this->clientsTable = src.clientsTable;
-		this->fdTable = src.fdTable;
+		// this->fdTable = src.fdTable;
 	}
 	return (*this);
 }
@@ -37,8 +37,8 @@ void Server::SignalHandler(int signum)
 
 void Server::CloseFds() {
 	for(size_t i = 0; i < clientsTable.size(); i++){
-		std::cout << "Client <" << clientsTable[i].GetFd() << "> Disconnected" << std::endl;
-		close(clientsTable[i].GetFd());
+		std::cout << "Client <" << clientsTable[i].getFd() << "> Disconnected" << std::endl;
+		close(clientsTable[i].getFd());
 	}
 	if (server_fd != -1) {
 		std::cout << "Server <" << server_fd << "> disconnected" << std::endl;
@@ -87,59 +87,53 @@ void Server::InitSocket() {
 		throw(std::runtime_error("bind() failed"));
 	// Reasons for failure: port already in use, socket not created properly,
 	//  address not available (e.g. requires admin privileges).
-	std::cout << "TEST\n";
 
 	// Tells the OS that this socket is now ready to accept 128 connections
 	// (SOMAXCONN is the max amount allowed per kernel).
     if (listen(server_fd, SOMAXCONN) == -1)
 		throw(std::runtime_error("listen() failed"));
 		// Reasons for failure: socket not properly bound, system is out of resources.
-
-	newClient.fd = server_fd;
-	newClient.events = POLLIN;
-	newClient.revents = 0;
-	fdTable.push_back(newClient);
 }
 
-void Server::InitPollFd() {
-	pollfd NewPoll;
+void Server::InitEpoll() {
+    epoll_fd = epoll_create1(0); // Create an epoll instance
+    if (epoll_fd == -1) {
+		throw(std::runtime_error("epoll_create1() failed"));}
+	struct epoll_event event;
+	// memset
+    event.events = EPOLLIN; // or EPOLLIN | EPOLLRDHUP; to check
+    event.data.fd = this->server_fd;
 
-	NewPoll.fd = this->server_fd; //-> add the server socket to the pollfd
-	NewPoll.events = POLLIN; //-> set the event to POLLIN for reading data
-	NewPoll.revents = 0; //-> set the revents to 0
-	fdTable.push_back(NewPoll); //-> add the server socket to the pollfd
+    if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, this->server_fd, &event) == -1) // Add the server socket to the epoll instance
+        throw(std::runtime_error("epoll_ctl() failed"));
 }
 
 void Server::start() {
 	this->port = 4444;
     
 	InitSocket();
-	InitPollFd();
+	InitEpoll();
 	std::cout << "Server initialized\n";
     std::cout << "Server <" << this->server_fd << "> listening on port " << port << "\n";
-	
-	while (Server::Signal == false) //-> run the server until the signal is received
-	{
-		if((poll(&fdTable[0],fdTable.size(),-1) == -1) && Server::Signal == false) //-> wait for an event
-			throw(std::runtime_error("poll() failed"));
-		for (size_t i = 0; i < fdTable.size(); i++) //-> check all file descriptors
-		{
-			if (fdTable[i].revents & POLLIN)//-> check if there is data to read
-			{
-				if (fdTable[i].fd == this->server_fd)
-					AcceptNewClient(); //-> accept new client
-				else
-					ReceiveNewData(fdTable[i].fd);
-			}
-		}
-	}
-	// for (size_t i = 0; i < fdTable.size(); ++i) {
-	// 	std::cout << "\n─── fdTable[" << i << "]\n";
-	// 	std::cout << "\t├── fd\t\t" << fdTable[i].fd << "\n";
-	// 	std::cout << "\t├── events\t" << fdTable[i].events << "\n";
-	// 	std::cout << "\t└── revents\t" << fdTable[i].revents << "\n";
-	// }
-	CloseFds(); // Close the file descriptors when the server stops
+	struct epoll_event events[42];
+	while (Server::Signal == false) // Run the server until the signal is received
+    {
+        int event_count = epoll_wait(epoll_fd, events, MAX_EVENTS, -1); // Wait for an event
+        if (event_count == -1 && Server::Signal == false)
+            throw(std::runtime_error("epoll_wait() failed"));
+
+        for (int i = 0; i < event_count; i++) // Check all file descriptors
+        {
+            if (events[i].events & EPOLLIN) // Check if there is data to read
+            {
+                if (events[i].data.fd == this->server_fd)
+                    AcceptNewClient(); // Accept new client
+                else
+                    ReceiveNewData(events[i].data.fd);
+            }
+        }
+    }
+    CloseFds(); // Close the file descriptors when the server stops
 }
 
 void Server::AcceptNewClient()
@@ -151,41 +145,126 @@ void Server::AcceptNewClient()
 	// accept() extracts the 1st connection request from the pending queue, creating a new socket
 	int fdClient = accept(server_fd, (sockaddr *)&(cliadd), &len);
 	if (fdClient == -1)
-	{ std::cout << "accept() failed" << std::endl; return; }
+	{
+		std::cout << "accept() failed" << std::endl;
+		return;
+	}
 
 	// fcntl() edits the fd and sets the new socket to non-blocking mode
 	if (fcntl(fdClient, F_SETFL, O_NONBLOCK) == -1)
 	{ std::cout << "fcntl() failed" << std::endl; return; }
 
-	this->newClient.fd = fdClient; // Store the client's file descriptor
-	this->newClient.events = POLLIN; // Set the event type for poll(). POLLIN: The client socket is ready for reading
-	this->newClient.revents = 0;// Reset the revents field (used by poll() to report events)
+	struct epoll_event event;
+    event.events = EPOLLIN; // Set the event type for epoll(). EPOLLIN: The client socket is ready for reading
+    event.data.fd = fdClient;
 
-	clientObject.SetFd(fdClient); // Store the file descriptor in the client object
-	clientObject.setIpAdd(inet_ntoa((cliadd.sin_addr))); // Convert the client's IP address from binary to string format and store it
+    if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fdClient, &event) == -1) // Add the client socket to the epoll instance
+    {
+        std::cout << "epoll_ctl() failed" << std::endl;
+        close(fdClient);
+        return;
+    }
 
-	clientsTable.push_back(clientObject); // Add the new client to the list of connected clientsTable
-	fdTable.push_back(newClient); // Add the client’s file descriptor info to the poll() table
+    clientObject.SetFd(fdClient); // Store the file descriptor in the client object
+    clientObject.setIpAdd(inet_ntoa((cliadd.sin_addr))); // Convert the client's IP address from binary to string format and store it
+
+    clientsTable.push_back(clientObject); // Add the new client to the list of connected clients
 
 	std::cout << "Client <" << fdClient << "> Connected" << std::endl;
 }
 
 void	Server::ReceiveNewData(int fd) {	
-	char buff[1024];
-	memset(buff, 0, sizeof(buff));
-	ssize_t bytes = recv(fd, buff, sizeof(buff) - 1 , 0);
-	if(bytes <= 0)
+	char buffer[1024];
+	std::string line;
+	ssize_t bytes;
+
+	// catch errors
+	
+	memset(buffer, 0, sizeof(buffer));
+
+	size_t i = 0;
+	while (i < clientsTable.size())
+	{
+		if (clientsTable[i].getFd() == fd && !clientsTable[i].getSaved().empty()) {
+			line += clientsTable[i].getSaved();
+			clientsTable[i].getSaved().clear();
+			// std::cout << "FOUND MATCHING FD =  <" << fd << std::endl;
+			break;
+		}
+		i++;
+	}
+
+	bytes = recv(fd, buffer, sizeof(buffer) - 1 , 0);
+	line += buffer;
+
+	if (line.empty() || bytes == -1)//if(bytes <= 0)
 	{
 		RemoveClient(fd);
 		RemoveFds(fd);
 		std::cout << "Client <" << fd << "> Disconnected" << std::endl;
 		close(fd);
 	}
+
+	// check if in list
+
+	size_t pos;
+    do
+    {
+        pos = line.find("\r\n");
+        if (pos != std::string::npos)
+            pos += 2;
+
+        std::string lineRead = line.substr(0, pos);
+        line = line.erase(0, pos);
+
+        if (pos == std::string::npos && !lineRead.empty())
+        {
+            clientsTable[i].getSaved() = lineRead;
+            return;
+        }
+        if (!lineRead.empty())
+        {
+            std::cout << "CLIENT " << fd << ">> " << lineRead;
+			// check if in list
+            parse(lineRead);
+        }
+    } while (pos != std::string::npos);
+
+	std::cout << "PRINT line =  " << line << std::endl;
+
 }
+
+std::string Server::ft_trim(const std::string &str)
+{
+    size_t end = str.find_last_not_of("\r\n");
+    return (end == std::string::npos) ? "" : str.substr(0, end + 1);
+}
+
+void Server::parse(std::string &line)
+{
+	std::cout << "line =  " << line << std::endl;
+    size_t pos = line.find(' ');
+    std::string cmd = line.substr(0, pos);
+
+    std::string args;
+    if (pos != std::string::npos) 
+        args = ft_trim(line.substr(pos + 1));
+    else 
+        args = "";
+
+    if (cmd == "CAP")
+	{
+		std::cout << "FOUND COMMAND =  " << cmd << std::endl;
+		// sendMsg(client, "CAP * LS :");
+	}
+    else
+        std::cout << "Unknown command: " << cmd << std::endl;
+}
+
 
 void Server::RemoveClient(int fd){
 	for (size_t i = 0; i < this->clientsTable.size(); i++){
-		if (this->clientsTable[i].GetFd() == fd)
+		if (this->clientsTable[i].getFd() == fd)
 			{
 				this->clientsTable.erase(this->clientsTable.begin() + i);
 				return;
@@ -193,12 +272,16 @@ void Server::RemoveClient(int fd){
 	}
 }
 
-void Server::RemoveFds(int fd){
-	for (size_t i = 0; i < this->fdTable.size(); i++){
-		if (this->fdTable[i].fd == fd)
-			{
-				this->fdTable.erase(this->fdTable.begin() + i);
-				return;
-			}
-	}
+void Server::RemoveFds(int fd)
+{
+	// for (size_t i = 0; i < this->fdTable.size(); i++){
+	// 	if (this->fdTable[i].fd == fd)
+	// 		{
+	// 			this->fdTable.erase(this->fdTable.begin() + i);
+	// 			return;
+	// 		}
+	// }
+	if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, NULL) == -1) {
+        std::cerr << "epoll_ctl() failed to remove fd: " << fd << std::endl;
+    }
 }

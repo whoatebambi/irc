@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: florencecousergue <florencecousergue@st    +#+  +:+       +#+        */
+/*   By: jpointil <jpointil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/15 12:29:01 by fcouserg          #+#    #+#             */
-/*   Updated: 2025/02/28 16:28:45 by florencecou      ###   ########.fr       */
+/*   Updated: 2025/03/06 14:31:22 by jpointil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ class Client {
 		std::string nickname;
 		std::string username;
 		std::string ipadd;
+		std::string _saved;
 		
 	public:
 		Client();
@@ -32,5 +33,9 @@ class Client {
 		void SetFd(int fd);
 		void setIpAdd(std::string ipadd);
 
-		int GetFd();
+		// GETTERS
+		int getFd() const;
+		std::string	getSaved(void) const;
+
+
 };

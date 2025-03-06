@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Client.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: florencecousergue <florencecousergue@st    +#+  +:+       +#+        */
+/*   By: jpointil <jpointil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/15 12:29:01 by fcouserg          #+#    #+#             */
-/*   Updated: 2025/02/27 16:36:37 by florencecou      ###   ########.fr       */
+/*   Updated: 2025/03/06 14:32:16 by jpointil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,4 +35,5 @@ Client &Client::operator=(Client const &src){
 void Client::SetFd(int fd){this->fd = fd;}
 void Client::setIpAdd(std::string ipadd){this->ipadd = ipadd;}
 
-int Client::GetFd(){return this->fd;}
+int Client::getFd() const {return this->fd;}
+std::string Client::getSaved() const {return this->_saved;}
