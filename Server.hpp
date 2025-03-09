@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jpointil <jpointil@student.42.fr>          +#+  +:+       +#+        */
+/*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/15 12:29:01 by fcouserg          #+#    #+#             */
-/*   Updated: 2025/03/06 16:24:08 by jpointil         ###   ########.fr       */
+/*   Updated: 2025/03/09 17:20:25 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,11 +24,13 @@
 #include <vector>
 #include <arpa/inet.h> //-> for inet_ntoa()
 
+class Client; // Forward declaration of Client class
+
 class Server {
 	private:
 		int port;
-		int server_fd;
-		static bool Signal; // static boolean for signal
+		int _fd;
+		bool _isLive; // need static?
 		std::vector<Client> clientsTable; // Stores detailed client information (fd, ip, nickname, messages, status...)
 		struct sockaddr_in cliadd;
 		int epoll_fd;
@@ -42,17 +44,20 @@ class Server {
 		~Server();
 		Server(Server const &src);
 		Server &operator=(Server const &src);
-		
-		void start();
-		void	CloseFds();
-		void	InitSocket();
-		void	InitEpoll();
-		static void	SignalHandler(int signum); //-> signal handler
-		void	AcceptNewClient();
-		void	ReceiveNewData(int fd);
-		void	RemoveClient(int fd);
-		void	RemoveFds(int fd);
 
-		std::string	ft_trim(const std::string &str);
-		void		parse(std::string &line);
+		static Server& getInstance();
+		bool isLive();
+		void shutdown();
+		
+		void Monitor();
+		void	CloseFds();
+		void	Init();
+		void	AcceptNewClient();
+		void	RemoveClient(int fd);
+		void handleEpollIn(const epoll_event &event);
+		void  handleClientData(const epoll_event &event);
+		void  handleEpollWaitError();
+		void  handleEpollError(const epoll_event &event);
+		// void	RemoveFds(int fd);
+
 };

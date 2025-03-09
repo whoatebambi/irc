@@ -3,36 +3,46 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jpointil <jpointil@student.42.fr>          +#+  +:+       +#+        */
+/*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/15 12:29:01 by fcouserg          #+#    #+#             */
-/*   Updated: 2025/03/06 16:37:58 by jpointil         ###   ########.fr       */
+/*   Updated: 2025/03/09 17:21:06 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 
-bool Server::Signal = false; //-> initialize the static boolean
+Server &Server::getInstance()
+{
+    static Server instance;
+    return instance;
+}
 
-Server::Server(){this->server_fd = -1;} // Server::Server() : server_fd(-1) {}
+bool Server::isLive()
+{
+    if(this->_isLive)
+        return true;
+    return false;
+}
+
+void Server::shutdown()
+{
+    this->_isLive = false;
+}
+
+Server::Server(){this->_fd = -1;} // Server::Server() : _fd(-1) {}
 Server::~Server(){}
 Server::Server(Server const &src){*this = src;}
 Server &Server::operator=(Server const &src){
 	if (this != &src){
 		this->port = src.port;
-		this->server_fd = src.server_fd;
+		this->_fd = src._fd;
 		this->clientsTable = src.clientsTable;
 		// this->fdTable = src.fdTable;
 	}
 	return (*this);
 }
 
-void Server::SignalHandler(int signum)
-{
-	(void)signum;
-	// std::cout << std::endl << "Signal Received!" << std::endl;
-	Server::Signal = true; //-> set the static boolean to true to stop the server
-}
 
 
 void Server::CloseFds() {
@@ -40,100 +50,88 @@ void Server::CloseFds() {
 		std::cout << "Client <" << clientsTable[i].getFd() << "> Disconnected" << std::endl;
 		close(clientsTable[i].getFd());
 	}
-	if (server_fd != -1) {
-		std::cout << "Server <" << server_fd << "> disconnected" << std::endl;
-		close(server_fd);
+	if (_fd != -1) {
+		std::cout << "Server <" << _fd << "> disconnected" << std::endl;
+		close(_fd);
 	}
 }
 
-// 1️⃣ Create the socket → socket()
-// 2️⃣ Set socket options → setsockopt() (prevents "Address already in use" error)
-// 3️⃣ Set non-blocking mode → fcntl()
-// 4️⃣ Bind the socket to specified address/port → bind()
-// 5️⃣ Mark the socket for listening → listen()
-void Server::InitSocket() {
-	std::cout << "Initializing server...\n";
-	
-	server_fd = socket(AF_INET, SOCK_STREAM, 0); // socket() creates the server socket
-    if (server_fd == -1)
-        throw(std::runtime_error("socket() failed"));
-	
-    sockaddr_in serverAddr; // Internet domain socket setup
-    std::memset(&serverAddr, 0, sizeof(serverAddr));
-    serverAddr.sin_family = AF_INET; // Sets the address family to ipv4
-    serverAddr.sin_port = htons(port); // Converts the port to network byte order (big endian)
-    serverAddr.sin_addr.s_addr = INADDR_ANY; // Means “listen on all available network interfaces.”
-
-	int en = 1;
-	// By default, when a server closes a socket, the operating system keeps the port blocked for a short period 
-	// Without SO_REUSEADDR, when the server is restarted, it might fail to bind for a while.
-	if(setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &en, sizeof(en)) == -1)
-		throw(std::runtime_error("setsockopt() SO_REUSEADDR failed"));
-	// OPTIONAL // SO_KEEPALIVE Prevents keeping dead connections open forever
-	// setsockopt(server_fd, SOL_SOCKET, SO_KEEPALIVE, &opt, sizeof(opt));
-	// OPTIONAL // TCP_NODELAY Disables Nagle's Algorithm (faster small messages)
-	// setsockopt(server_fd, IPPROTO_TCP, TCP_NODELAY, &opt, sizeof(opt));
-	
-	// Sets the socket to non-blocking mode. Socket operations (accept(), recv(), etc.)
-	// will return immediately instead of waiting.
-	if (fcntl(server_fd, F_SETFL, O_NONBLOCK) == -1) 
-		throw(std::runtime_error("fcntl() O_NONBLOCK failed"));
-
-	// OPTIONAL // SIGPIPE (Prevents crashes when writing to a closed socket)
-	// signal(SIGPIPE, SIG_IGN);
-	// Associates server_fd with a specific IP address and port stored in serverAddr.
-	// This allows clientsTable to know where to connect.
-    if (bind(server_fd, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) == -1)
-		throw(std::runtime_error("bind() failed"));
-	// Reasons for failure: port already in use, socket not created properly,
-	//  address not available (e.g. requires admin privileges).
-
-	// Tells the OS that this socket is now ready to accept 128 connections
-	// (SOMAXCONN is the max amount allowed per kernel).
-    if (listen(server_fd, SOMAXCONN) == -1)
-		throw(std::runtime_error("listen() failed"));
-		// Reasons for failure: socket not properly bound, system is out of resources.
-}
-
-void Server::InitEpoll() {
-    epoll_fd = epoll_create1(0); // Create an epoll instance
-    if (epoll_fd == -1) {
-		throw(std::runtime_error("epoll_create1() failed"));}
-	struct epoll_event event;
-	// memset
-    event.events = EPOLLIN; // or EPOLLIN | EPOLLRDHUP; to check
-    event.data.fd = this->server_fd;
-
-    if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, this->server_fd, &event) == -1) // Add the server socket to the epoll instance
-        throw(std::runtime_error("epoll_ctl() failed"));
-}
-
-void Server::start() {
+void Server::Init() {
+	this->_isLive = true;
 	this->port = 4444;
-    
-	InitSocket();
-	InitEpoll();
-	std::cout << "Server initialized\n";
-    std::cout << "Server <" << this->server_fd << "> listening on port " << port << "\n";
-	struct epoll_event events[42];
-	while (Server::Signal == false) // Run the server until the signal is received
-    {
-        int event_count = epoll_wait(epoll_fd, events, MAX_EVENTS, -1); // Wait for an event
-        if (event_count == -1 && Server::Signal == false)
-            throw(std::runtime_error("epoll_wait() failed"));
+	this->_fd = socket(AF_INET, SOCK_STREAM, 0); // Create a socket
+	if (this->_fd == -1)
+		throw std::runtime_error("socket() failed");
 
-        for (int i = 0; i < event_count; i++) // Check all file descriptors
-        {
-            if (events[i].events & EPOLLIN) // Check if there is data to read
-            {
-                if (events[i].data.fd == this->server_fd)
-                    AcceptNewClient(); // Accept new client
-                else
-                    ReceiveNewData(events[i].data.fd);
-            }
+	int opt = 1; // Set socket options
+	if (setsockopt(this->_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
+		throw std::runtime_error("setsockopt() failed");
+
+	sockaddr_in server_addr; // Bind the socket to an address and port
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_addr.s_addr = INADDR_ANY;
+	server_addr.sin_port = htons(this->port);
+	if (bind(this->_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1)
+		throw std::runtime_error("bind() failed");
+		
+	if (listen(this->_fd, SOMAXCONN) == -1) // Listen for incoming connections
+		throw std::runtime_error("listen() failed");
+
+	this->epoll_fd = epoll_create1(0); // Create an epoll instance
+	if (this->epoll_fd == -1)
+		throw std::runtime_error("epoll_create1() failed");
+
+	struct epoll_event event; // Add the server socket to the epoll instance
+	event.events = EPOLLIN;
+	event.data.fd = this->_fd;
+	if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, this->_fd, &event) == -1)
+		throw std::runtime_error("epoll_ctl() failed");
+	std::cout << "Server <" << this->_fd << "> listening on port " << port << "\n";
+}
+
+void Server::Monitor() {
+	struct epoll_event events[42];
+
+	int event_count = epoll_wait(this->epoll_fd, events, MAX_EVENTS, -1); // check values
+	if (event_count == -1)
+        return (handleEpollWaitError());
+
+	for (int i = 0; i < event_count; i++)
+	{
+        if (events[i].events & EPOLLIN)
+            handleEpollIn(events[i]);
+        else if (events[i].events & (EPOLLERR | EPOLLHUP))
+            handleEpollError(events[i]);
+    }
+}	
+
+void Server::handleEpollWaitError() {
+    if (isLive())
+        throw std::runtime_error("epoll_wait() failed");
+}
+
+void Server::handleEpollIn(const epoll_event &event) {
+	if (event.data.fd == this->_fd)
+		AcceptNewClient();
+    else
+		handleClientData(event);
+}
+
+void Server::handleClientData(const epoll_event &event) {
+    int fd = event.data.fd;
+    for (size_t j = 0; j < clientsTable.size(); ++j)
+	{
+        if (clientsTable[j].getFd() == fd) {
+            clientsTable[j].ParseDataClient(fd);
+            break;
         }
     }
-    CloseFds(); // Close the file descriptors when the server stops
+}
+
+void Server::handleEpollError(const epoll_event &event) {
+	std::cerr << "Epoll error on fd: " << event.data.fd << std::endl;
+	// unsubscribe(((MainSocket *)events[i].data.ptr)->getFd());
+    RemoveClient(event.data.fd);
 }
 
 void Server::AcceptNewClient()
@@ -143,7 +141,7 @@ void Server::AcceptNewClient()
 	socklen_t len = sizeof(cliadd); // Store the size of the client address structure
 
 	// accept() extracts the 1st connection request from the pending queue, creating a new socket
-	int fdClient = accept(server_fd, (sockaddr *)&(cliadd), &len);
+	int fdClient = accept(_fd, (sockaddr *)&(cliadd), &len);
 	if (fdClient == -1)
 	{
 		std::cout << "accept() failed" << std::endl;
@@ -167,98 +165,8 @@ void Server::AcceptNewClient()
 
     clientObject.SetFd(fdClient); // Store the file descriptor in the client object
     clientObject.setIpAdd(inet_ntoa((cliadd.sin_addr))); // Convert the client's IP address from binary to string format and store it
-
     clientsTable.push_back(clientObject); // Add the new client to the list of connected clients
-
 	std::cout << "Client <" << fdClient << "> Connected" << std::endl;
-}
-
-void	Server::ReceiveNewData(int fd) {	
-	char buffer[1024];
-	std::string line;
-	ssize_t bytes;
-
-	// catch errors
-	
-	memset(buffer, 0, sizeof(buffer));
-
-	size_t i = 0;
-	while (i < clientsTable.size())
-	{
-		if (clientsTable[i].getFd() == fd && !clientsTable[i].getSaved().empty()) {
-			line += clientsTable[i].getSaved();
-			clientsTable[i].getSaved().clear();
-			// std::cout << "FOUND MATCHING FD =  <" << fd << std::endl;
-			break;
-		}
-		i++;
-	}
-
-	bytes = recv(fd, buffer, sizeof(buffer) - 1 , 0);
-	line += buffer;
-
-	if (line.empty() || bytes == -1)//if(bytes <= 0)
-	{
-		RemoveClient(fd);
-		RemoveFds(fd);
-		std::cout << "Client <" << fd << "> Disconnected" << std::endl;
-		close(fd);
-	}
-
-	// check if in list
-
-	size_t pos;
-    do
-    {
-        pos = line.find("\r\n");
-        if (pos != std::string::npos)
-            pos += 2;
-
-        std::string lineRead = line.substr(0, pos);
-        line = line.erase(0, pos);
-
-        if (pos == std::string::npos && !lineRead.empty())
-        {
-            clientsTable[i].getSaved() = lineRead;
-            return;
-        }
-        if (!lineRead.empty())
-        {
-            std::cout << "CLIENT " << fd << ">> " << lineRead;
-			// check if in list
-            parse(lineRead);
-        }
-    } while (pos != std::string::npos);
-
-	std::cout << "PRINT line =  " << line << std::endl;
-
-}
-
-std::string Server::ft_trim(const std::string &str)
-{
-    size_t end = str.find_last_not_of("\r\n");
-    return (end == std::string::npos) ? "" : str.substr(0, end + 1);
-}
-
-void Server::parse(std::string &line)
-{
-	std::cout << "line =  " << line << std::endl;
-    size_t pos = line.find(' ');
-    std::string cmd = line.substr(0, pos);
-
-    std::string args;
-    if (pos != std::string::npos) 
-        args = ft_trim(line.substr(pos + 1));
-    else 
-        args = "";
-
-    if (cmd == "CAP")
-	{
-		std::cout << "FOUND COMMAND =  " << cmd << std::endl;
-		// sendMsg(client, "CAP * LS :");
-	}
-    else
-        std::cout << "Unknown command: " << cmd << std::endl;
 }
 
 
@@ -272,16 +180,16 @@ void Server::RemoveClient(int fd){
 	}
 }
 
-void Server::RemoveFds(int fd)
-{
-	// for (size_t i = 0; i < this->fdTable.size(); i++){
-	// 	if (this->fdTable[i].fd == fd)
-	// 		{
-	// 			this->fdTable.erase(this->fdTable.begin() + i);
-	// 			return;
-	// 		}
-	// }
-	if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, NULL) == -1) {
-        std::cerr << "epoll_ctl() failed to remove fd: " << fd << std::endl;
-    }
-}
+// void Server::RemoveFds(int fd)
+// {
+// 	// for (size_t i = 0; i < this->fdTable.size(); i++){
+// 	// 	if (this->fdTable[i].fd == fd)
+// 	// 		{
+// 	// 			this->fdTable.erase(this->fdTable.begin() + i);
+// 	// 			return;
+// 	// 		}
+// 	// }
+// 	if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, NULL) == -1) {
+//         std::cerr << "epoll_ctl() failed to remove fd: " << fd << std::endl;
+//     }
+// }

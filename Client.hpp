@@ -3,21 +3,25 @@
 /*                                                        :::      ::::::::   */
 /*   Client.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jpointil <jpointil@student.42.fr>          +#+  +:+       +#+        */
+/*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/15 12:29:01 by fcouserg          #+#    #+#             */
-/*   Updated: 2025/03/06 14:31:22 by jpointil         ###   ########.fr       */
+/*   Updated: 2025/03/09 17:20:40 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
+#include "Server.hpp"
+
 #include <iostream>
 #include <string>
+#include <cstring>
+#include <sys/socket.h>
 
 class Client {
 	private:
-		int fd; //-> client file descriptor
+		int _fd; //-> client file descriptor
 		std::string nickname;
 		std::string username;
 		std::string ipadd;
@@ -25,17 +29,22 @@ class Client {
 		
 	public:
 		Client();
-		Client(std::string nickname, std::string username, int fd);
+		Client(std::string nickname, std::string username, int _fd);
 		~Client();
 		Client(Client const &src);
 		Client &operator=(Client const &src);
 
-		void SetFd(int fd);
+		void SetFd(int _fd);
 		void setIpAdd(std::string ipadd);
 
 		// GETTERS
 		int getFd() const;
 		std::string	getSaved(void) const;
+		
 
+		void	ParseDataClient(int fd);
+		void	parse(std::string &line);
+		std::string	ft_trim(const std::string &str);
+		void	sendMsg(const std::string &msg);
 
 };
