@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
+/*   By: jpointil <jpointil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/15 12:29:01 by fcouserg          #+#    #+#             */
-/*   Updated: 2025/03/09 17:21:06 by codespace        ###   ########.fr       */
+/*   Updated: 2025/03/10 14:06:21 by jpointil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -164,7 +164,7 @@ void Server::AcceptNewClient()
     }
 
     clientObject.SetFd(fdClient); // Store the file descriptor in the client object
-    clientObject.setIpAdd(inet_ntoa((cliadd.sin_addr))); // Convert the client's IP address from binary to string format and store it
+    clientObject.set_IpAdd(inet_ntoa((cliadd.sin_addr))); // Convert the client's IP address from binary to string format and store it
     clientsTable.push_back(clientObject); // Add the new client to the list of connected clients
 	std::cout << "Client <" << fdClient << "> Connected" << std::endl;
 }

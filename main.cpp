@@ -14,38 +14,21 @@
 #include "Server.hpp"
 #include <iostream>
 #include <csignal>
+#include <cstdlib>
 
 
-
-
-static void signal_interrupt(int sig)
-{
-    (void)sig;
+void handleSignal(int signal) {
+    
+    std::cout << std::endl << "Signal " << signal << " (SIGINT) reçu. Fermeture propre du programme." << std::endl;
+    // std::exit(signal);
     Server::getInstance().shutdown();
-}
-
-static int handle_signals(int sig, void (*handler)(int))
-{
-    sigset_t set;
-    struct sigaction action;
-
-    sigemptyset(&set);
-    action.sa_handler = handler;
-    action.sa_mask = set;
-    action.sa_flags = 0;
-    if (sigaction(sig, &action, NULL) == -1)
-    {
-        throw std::runtime_error("Sigaction failed");
-        return -1;
-    }
-    return 0;
+    return ;
 }
 
 int	main(void)
 {
 	try {
-		handle_signals(SIGINT, &signal_interrupt);
-        handle_signals(SIGQUIT, SIG_IGN);
+        std::signal(SIGINT, handleSignal);
 		Server::getInstance().Init();
 		while(Server::getInstance().isLive())
 			Server::getInstance().Monitor();

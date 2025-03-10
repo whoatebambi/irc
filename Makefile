@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: florencecousergue <florencecousergue@st    +#+  +:+       +#+         #
+#    By: jpointil <jpointil@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/01/15 12:29:01 by fcouserg          #+#    #+#              #
-#    Updated: 2025/02/18 18:03:36 by florencecou      ###   ########.fr        #
+#    Updated: 2025/03/10 13:44:34 by jpointil         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,7 +24,7 @@ CC			=	/opt/homebrew/Cellar/gcc/14.2.0_1/bin/g++-14
 FLAG		=	-Wall -Wextra -Werror -std=c++98 -I/usr/local/include -L/usr/local/lib
 endif
 
-C_FILES		=	main.cpp Client.cpp Server.cpp
+C_FILES		=	main.cpp Client.cpp Server.cpp Command.cpp CapCommand.cpp
 
 OBJ_DIR		=	builds
 
