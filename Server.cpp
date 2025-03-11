@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jpointil <jpointil@student.42.fr>          +#+  +:+       +#+        */
+/*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/15 12:29:01 by fcouserg          #+#    #+#             */
-/*   Updated: 2025/03/10 14:06:21 by jpointil         ###   ########.fr       */
+/*   Updated: 2025/03/11 16:54:58 by codespace        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,8 +47,8 @@ Server &Server::operator=(Server const &src){
 
 void Server::CloseFds() {
 	for(size_t i = 0; i < clientsTable.size(); i++){
-		std::cout << "Client <" << clientsTable[i].getFd() << "> Disconnected" << std::endl;
-		close(clientsTable[i].getFd());
+		std::cout << "Client <" << clientsTable[i]->getFd() << "> Disconnected" << std::endl;
+		close(clientsTable[i]->getFd());
 	}
 	if (_fd != -1) {
 		std::cout << "Server <" << _fd << "> disconnected" << std::endl;
@@ -121,8 +121,8 @@ void Server::handleClientData(const epoll_event &event) {
     int fd = event.data.fd;
     for (size_t j = 0; j < clientsTable.size(); ++j)
 	{
-        if (clientsTable[j].getFd() == fd) {
-            clientsTable[j].ParseDataClient(fd);
+        if (clientsTable[j]->getFd() == fd) {
+            clientsTable[j]->ParseDataClient(fd);
             break;
         }
     }
@@ -135,27 +135,17 @@ void Server::handleEpollError(const epoll_event &event) {
 }
 
 void Server::AcceptNewClient()
-{
-	Client clientObject; // Create a new client object
+{	
 	std::memset(&cliadd, 0, sizeof(cliadd)); // Initialize client address structure to zero
 	socklen_t len = sizeof(cliadd); // Store the size of the client address structure
-
-	// accept() extracts the 1st connection request from the pending queue, creating a new socket
-	int fdClient = accept(_fd, (sockaddr *)&(cliadd), &len);
+	int fdClient = accept(_fd, (sockaddr *)&(cliadd), &len); // accept() extracts the 1st connection request from the pending queue, creating a new socket
 	if (fdClient == -1)
-	{
-		std::cout << "accept() failed" << std::endl;
-		return;
-	}
-
-	// fcntl() edits the fd and sets the new socket to non-blocking mode
-	if (fcntl(fdClient, F_SETFL, O_NONBLOCK) == -1)
+	{ std::cout << "accept() failed" << std::endl; return; }
+	if (fcntl(fdClient, F_SETFL, O_NONBLOCK) == -1) // fcntl() edits the fd and sets the new socket to non-blocking mode
 	{ std::cout << "fcntl() failed" << std::endl; return; }
-
 	struct epoll_event event;
     event.events = EPOLLIN; // Set the event type for epoll(). EPOLLIN: The client socket is ready for reading
     event.data.fd = fdClient;
-
     if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fdClient, &event) == -1) // Add the client socket to the epoll instance
     {
         std::cout << "epoll_ctl() failed" << std::endl;
@@ -163,16 +153,23 @@ void Server::AcceptNewClient()
         return;
     }
 
-    clientObject.SetFd(fdClient); // Store the file descriptor in the client object
-    clientObject.set_IpAdd(inet_ntoa((cliadd.sin_addr))); // Convert the client's IP address from binary to string format and store it
-    clientsTable.push_back(clientObject); // Add the new client to the list of connected clients
+	///////////////////
+	std::string ip = inet_ntoa(cliadd.sin_addr);
+    int port = ntohs(cliadd.sin_port);
+	Client* clientObject = new Client(fdClient, ip, port);//(newFd, ip, port);    
+	
+///////////////////
+// error: cannot convert ‘Client*’ to ‘const value_type&’ {aka ‘const Client&’}
+	clientsTable.push_back(clientObject); // Add the new client to the list of connected clients
+///////////////////	
+	
 	std::cout << "Client <" << fdClient << "> Connected" << std::endl;
 }
 
 
 void Server::RemoveClient(int fd){
 	for (size_t i = 0; i < this->clientsTable.size(); i++){
-		if (this->clientsTable[i].getFd() == fd)
+		if (this->clientsTable[i]->getFd() == fd)
 			{
 				this->clientsTable.erase(this->clientsTable.begin() + i);
 				return;

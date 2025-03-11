@@ -1,17 +1,13 @@
 #pragma once
 
-
 #include "Command.hpp"
+#include "Client.hpp"
+
+#include <string>
 
 class Client;
 
-
-class CapCommand : public Command
-{
-    private:
-       
+class CapCommand : public Command {
     public:
         void execute(const std::string &args, Client *client);
 };
-
-

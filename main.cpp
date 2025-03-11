@@ -1,21 +1,8 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: codespace <codespace@student.42.fr>        +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/15 12:29:01 by fcouserg          #+#    #+#             */
-/*   Updated: 2025/03/09 16:03:50 by codespace        ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
-#include "Client.hpp"
 #include "Server.hpp"
+
 #include <iostream>
 #include <csignal>
 #include <cstdlib>
-
 
 void handleSignal(int signal) {
     
@@ -41,4 +28,3 @@ int	main(void)
 	
 	return (0);
 }
-

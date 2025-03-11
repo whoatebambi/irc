@@ -1,61 +1,28 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Client.cpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jpointil <jpointil@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/01/15 12:29:01 by fcouserg          #+#    #+#             */
-/*   Updated: 2025/03/10 15:05:21 by jpointil         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "Client.hpp"
-#include <set>
-#include <sstream>
-#include <map>
-#include <functional>
 
+Client::Client(int fd, std::string ip, int port) {
+	this->_fd = fd;
+    this->_ipadd = ip;
+    this->_port = port;
+    this->_nickname = "";
+    this->_username = "";
 
-#include "CapCommand.hpp"
-
-
-Client::Client()
-{
-	this->_nickname = "";
-	this->_username = "";
-	this->_ipadd = "";
-	this->_fd = -1;
-
-    this->_commandMap["CAP"] = new CapCommand();
+	this->_CommandMap["CAP"] = new CapCommand();
+	this->_CommandMap["NICK"] = new CapCommand();
 }
-Client::Client(std::string _nickname, std::string _username, int _fd) :_fd(_fd), _nickname(_nickname), _username(_username){}
 Client::~Client(){
-    for (std::map<std::string, Command*>::iterator it = _commandMap.begin(); it != _commandMap.end(); ++it) {
-        delete it->second;
-    }
-    _commandMap.clear();
-}
-Client::Client(Client const &src){*this = src;}
-Client &Client::operator=(Client const &src){
-	if (this != &src){
-		this->_nickname = src._nickname;
-		this->_username = src._username;
-		this->_ipadd = src._ipadd;
-		this->_fd = src._fd;
+	for (std::map<std::string, Command*>::iterator it = this->_CommandMap.begin(); it != this->_CommandMap.end(); ++it) {
+		delete it->second;
 	}
-	return (*this);
+	this->_CommandMap.clear();
 }
-
-void Client::SetFd(int _fd){this->_fd = _fd;}
-void Client::set_IpAdd(std::string _ipadd){this->_ipadd = _ipadd;}
 
 int Client::getFd() const {return this->_fd;}
 std::string Client::getNickname() const {return this->_nickname;}
 std::string Client::getSaved() const {return this->_saved;}
 
 
-void	Client::ParseDataClient(int fd) {	 // swap fd for (uint32_t events)
+void	Client::ParseDataClient(int fd) {	 // swap fd to void
 	std::string line;
 
     if (!this->_saved.empty())
@@ -93,23 +60,23 @@ void	Client::ParseDataClient(int fd) {	 // swap fd for (uint32_t events)
             return;
         }
         if (!lineRead.empty())
-			parse(lineRead); // + check if in list
+			parse(lineRead);
     } while (pos != std::string::npos);
 }
 
 
 void Client::parse(std::string &line)
 {
+	// std::cout << "Client::parse() Address: " << this << std::endl;
 	std::cout << "<<< " << line;
-    size_t pos = line.find(' ');
-    std::string args;
-    std::string cmd = line.substr(0, pos);
-    if (pos != std::string::npos) 
-        args = ft_trim(line.substr(pos + 1));
+	size_t pos = line.find(' ');
+	std::string args;
+	std::string cmd = line.substr(0, pos);
+	if (pos != std::string::npos) 
+		{args = ft_trim(line.substr(pos + 1));}
 
-    std::map<std::string, Command*>::iterator it = _commandMap.find(cmd);
-    if (it != _commandMap.end())
-        it->second->execute(args, this);
+	if (cmd == "CAP")
+		this->_CommandMap["CAP"]->execute(args, this);
 	else if (cmd == "NICK")
         NickCommand(args);
     else if (cmd == "USER")
@@ -117,9 +84,9 @@ void Client::parse(std::string &line)
     else
         std::cout << "Unknown command: " << cmd << std::endl;
 
-    std::string msg = _ipadd + " " + _nickname + " " + _username + "\r\n";
+    // std::string msg = _ipadd + " " + _nickname + " " + _username + "\r\n";
     //std::cout << std::endl << msg << std::endl << std::endl;
-    send(this->_fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
+    // send(this->_fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
 }
 
 
