@@ -1,4 +1,5 @@
 #include "Command.hpp"
+#include "Client.hpp"
 
 void Command::sendMsg(Client *client, std::string msg)
 {

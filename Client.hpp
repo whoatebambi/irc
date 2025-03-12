@@ -1,8 +1,8 @@
 #pragma once
 
+#include "Server.hpp"
 #include "Command.hpp"
 #include "CapCommand.hpp"
-#include "Server.hpp"
 
 #include <cstdarg>
 #include <iostream>
@@ -14,6 +14,8 @@
 #include <sstream>
 #include <functional>
 
+class Command;
+class CapCommand;
 
 class Client {
 	private:

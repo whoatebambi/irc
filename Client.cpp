@@ -67,7 +67,6 @@ void	Client::ParseDataClient(int fd) {	 // swap fd to void
 
 void Client::parse(std::string &line)
 {
-	// std::cout << "Client::parse() Address: " << this << std::endl;
 	std::cout << "<<< " << line;
 	size_t pos = line.find(' ');
 	std::string args;

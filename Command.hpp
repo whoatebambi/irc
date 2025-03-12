@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Client.hpp"
-
 #include <string>
 
 class Client;
 
 class Command {
+    private:
+
     public:
 		virtual ~Command() {}
 		virtual void execute(const std::string &args, Client *client) = 0;
