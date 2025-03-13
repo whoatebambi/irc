@@ -23,6 +23,7 @@ class Server
 	private:
 		int	port;
 		int	_fd;
+		std::string	_serverName;
 		bool	_isLive; // need static?
 		std::vector<Client*>	clientsTable;
 		struct sockaddr_in	cliadd;
@@ -47,4 +48,6 @@ class Server
 		void	handleEpollError(const epoll_event &event);
 
 		void	newChannel(Client *client, std::string chanName, std::string key);
+
+		std::string	getServerName() const;
 };

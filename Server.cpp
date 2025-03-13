@@ -18,7 +18,12 @@ void Server::shutdown()
 	this->_isLive = false;
 }
 
-Server::Server(){ this->_fd = -1; }
+Server::Server(){ this->_fd = -1; this->_serverName = "Servito"; }
+
+std::string Server::getServerName() const
+{
+	return this->_serverName;
+}
 
 Server::~Server()
 {

@@ -9,14 +9,14 @@ void CommandMode::execute(const std::string &args, Client *client)
 	{
 		std::cout << "Not enough parameters" << std::endl;
 		return;
-		// return Command::sendRpl(client, ERR_NEEDMOREPARAMS, client->getNick().c_str(), " :Not enough parameters");
 	}
-	// std::string nickname = client->getNickname();
 	if (arg[0] == client->getNickname())
 	{
-		std::cout << "Same nickname" << std::endl;
-		// sendMsg(client, client->getNickname());
-		// return Command::sendRpl(client, RPL_UMODEIS, client->getNick().c_str());
+		std::string serverName = Server::getInstance().getServerName();
+		std::string nickname = client->getNickname();
+		std::string msg = ":" + serverName + " 221 " + nickname + " +i";
+		std::cout << "msg = " << msg << std::endl;
+		sendMsg(client, msg.c_str());
 	}
 }
 
