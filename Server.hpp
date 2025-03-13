@@ -13,8 +13,10 @@
 #include <arpa/inet.h> 
 #include <csignal>
 #include <cstdlib>
+#include <map>
 
 class Client;
+class Channel;
 
 class Server
 {
@@ -26,6 +28,7 @@ class Server
 		struct sockaddr_in	cliadd;
 		int	epoll_fd;
 		static const int	MAX_EVENTS = 10;
+		std::map<std::string, Channel*> _channelMap;
 
 	public:
 		Server();
@@ -39,8 +42,9 @@ class Server
 		void	Init();
 		void	AcceptNewClient();
 		void	RemoveClient(int fd);
-		void	handleEpollIn(const epoll_event &event);
 		void	handleClientData(const epoll_event &event);
 		void	handleEpollWaitError();
 		void	handleEpollError(const epoll_event &event);
+
+		void	newChannel(Client *client, std::string chanName, std::string key);
 };

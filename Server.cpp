@@ -2,8 +2,8 @@
 
 Server &Server::getInstance()
 {
-	static Server instance;
-	return instance;
+	static Server	instance;
+	return (instance);
 }
 
 bool Server::isLive()
@@ -19,20 +19,21 @@ void Server::shutdown()
 }
 
 Server::Server(){ this->_fd = -1; }
+
 Server::~Server()
 {
 	// std::cout << "Server <" << this->_fd << "> destructor called" << std::endl;
 	CloseFds();
 
-	// // Delete clients using index-based loop
-	// for (size_t i = 0; i < clientsTable.size(); ++i)
-	//     delete clientsTable[i];
-	// clientsTable.clear();
-
-	// Delete clients using iterator-based loop
 	for (std::vector<Client*>::iterator it = clientsTable.begin(); it != clientsTable.end(); ++it)
 		delete *it;
 	clientsTable.clear();
+
+	for (std::map<std::string, Channel*>::iterator it = _channelMap.begin(); it != _channelMap.end(); ++it)
+		delete it->second;
+    _channelMap.clear();
+
+    close(this->_fd);
 }
 
 void Server::CloseFds()
@@ -92,25 +93,16 @@ void Server::Monitor()
 	for (int i = 0; i < event_count; i++)
 	{
 		if (events[i].events & EPOLLIN)
-			handleEpollIn(events[i]);
+		{
+			if (events[i].data.fd == this->_fd)
+				AcceptNewClient();
+			else
+				handleClientData(events[i]);			
+		}
 		else if (events[i].events & (EPOLLERR | EPOLLHUP))
 			handleEpollError(events[i]);
 	}
 }	
-
-void Server::handleEpollWaitError()
-{
-	if (isLive())
-		throw std::runtime_error("epoll_wait() failed");
-}
-
-void Server::handleEpollIn(const epoll_event &event)
-{
-	if (event.data.fd == this->_fd)
-		AcceptNewClient();
-	else
-		handleClientData(event);
-}
 
 void Server::handleClientData(const epoll_event &event)
 {
@@ -122,13 +114,6 @@ void Server::handleClientData(const epoll_event &event)
 			break;
 		}
 	}
-}
-
-void Server::handleEpollError(const epoll_event &event)
-{
-	std::cerr << "Epoll error on fd: " << event.data.fd << std::endl;
-	// unsubscribe(((MainSocket *)events[i].data.ptr)->getFd());
-	RemoveClient(event.data.fd);
 }
 
 void Server::AcceptNewClient()
@@ -168,16 +153,23 @@ void Server::RemoveClient(int fd)
 	}
 }
 
-// void Server::RemoveFds(int fd)
-// {
-// 	// for (size_t i = 0; i < this->fdTable.size(); i++){
-// 	// 	if (this->fdTable[i].fd == fd)
-// 	// 		{
-// 	// 			this->fdTable.erase(this->fdTable.begin() + i);
-// 	// 			return;
-// 	// 		}
-// 	// }
-// 	if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd, NULL) == -1) {
-//         std::cerr << "epoll_ctl() failed to remove fd: " << fd << std::endl;
-//     }
-// }
+void Server::newChannel(Client *client, std::string chanName, std::string key)
+{
+    Channel *newChan = new Channel(client, chanName, key);
+    _channelMap.insert(std::make_pair(chanName, newChan));
+    // newChan->getFounderMask() = client->getSource();
+    // newChan->joinChan(client, chanName, key);
+}
+
+void Server::handleEpollWaitError()
+{
+	if (isLive())
+		throw std::runtime_error("epoll_wait() failed");
+}
+
+void Server::handleEpollError(const epoll_event &event)
+{
+	std::cerr << "Epoll error on fd: " << event.data.fd << std::endl;
+	// unsubscribe(((MainSocket *)events[i].data.ptr)->getFd());
+	RemoveClient(event.data.fd);
+}

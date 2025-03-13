@@ -7,11 +7,14 @@ void CommandNick::execute(const std::string &args, Client *client)
 	std::string arr = "[]{}\\|";
 
 	std::string oldnick = client->getNickname();
+	const std::string oldmask = client->getSource();
+	std::cout << "Old mask: " << oldmask << std::endl;
+    client->setNickname(args);
+    const std::string newmask = client->getSource();
+	std::cout << "New mask: " << newmask << std::endl;
 
+    // Server::getInstance().updateList(oldmask, newmask);
 
-
-	// std::string msg = "<<<< NICKKKKKKKK ";
-	// msg += "\r\n";
-	// send(client->getFd(), msg.c_str(), msg.size(), MSG_NOSIGNAL);
-	//client->setNickname(arg[1]);
+    // std::set<int> pairs = Server::getInstance().getSharedChans(client);
+    // broadcast(pairs, ":" + oldnick + " NICK " + args);
 }

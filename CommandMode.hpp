@@ -7,9 +7,9 @@
 
 class Client;
 
-class CommandCap : public Command
+class CommandMode : public Command
 {
 	public:
 		void execute(const std::string &args, Client *client);
-		void sendWelcome(Client *client);
+		std::vector<std::string>	splitArgs(const std::string &input);
 };

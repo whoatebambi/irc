@@ -2,8 +2,8 @@
 
 void handleSignal(int signal)
 {
-	std::cout << std::endl << "Signal " << signal << " (SIGINT) reçu. Fermeture propre du programme." << std::endl;
-	// std::exit(signal);
+	(void)signal;
+	// std::cout << std::endl << "Signal " << signal << " (SIGINT) reçu. Fermeture propre du programme." << std::endl;
 	Server::getInstance().shutdown();
 	return ;
 }
@@ -17,7 +17,6 @@ int	main(void)
 			Server::getInstance().Monitor();
 	}
 	catch(const std::exception &e) {
-		// Server::getInstance().CloseFds();
 		std::cerr << e.what() << std::endl;
 	}
 	std::cout << "The Server Closed!" << std::endl;

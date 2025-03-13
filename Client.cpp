@@ -7,10 +7,12 @@ Client::Client(int fd, std::string ip, int port)
 	this->_port = port;
 	this->_nickname = "";
 	this->_username = "";
+	this->_realname = "";
 
 	this->_CommandMap["CAP"] = new CommandCap();
 	this->_CommandMap["NICK"] = new CommandNick();
 	this->_CommandMap["USER"] = new CommandUser();
+	this->_CommandMap["MODE"] = new CommandMode();
 }
 
 Client::~Client()
@@ -29,6 +31,9 @@ void Client::setNickname(const std::string &nickname) {this->_nickname = nicknam
 std::string	Client::getSaved() const {return this->_saved; }
 std::string Client::getUsername() const { return this->_username; }
 void Client::setUsername(const std::string &username) { this->_username = username; }
+std::string Client::getRealname() const { return this->_realname; }
+void Client::setRealname(const std::string &realname) { this->_realname = realname; }
+
 
 void	Client::ParseDataClient()
 {
@@ -88,16 +93,26 @@ void Client::parse(std::string &line)
 		this->_CommandMap["NICK"]->execute(args, this);
 	else if (cmd == "USER")
 		this->_CommandMap["USER"]->execute(args, this);
+	else if (cmd == "MODE")
+		this->_CommandMap["MODE"]->execute(args, this);
+	else if (cmd == "PING")
+	{
+		std::cout << "RECEIVED PNG MESSAGGEEEEEEEEEE" << line;
+		std::string msg = "PONG " + args + "\r\n";
+    	send(this->_fd, (msg).c_str(), msg.size(), MSG_NOSIGNAL);	
+	}
 	else
 		std::cout << "Unknown command: " << cmd << std::endl;
-
-	// std::string msg = _ipadd + " " + _nickname + " " + _username + "\r\n";
-	//std::cout << std::endl << msg << std::endl << std::endl;
-	// send(this->_fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
 }
 
 std::string Client::ft_trim(const std::string &str)
 {
 	size_t end = str.find_last_not_of("\r\n");
 	return (end == std::string::npos) ? "" : str.substr(0, end + 1);
+}
+
+std::string Client::getSource()
+{
+    std::string source = ":" + _nickname + "!" + _username + "@" + _ipadd;
+    return (source);
 }
