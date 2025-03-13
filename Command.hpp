@@ -4,9 +4,8 @@
 
 class Client;
 
-class Command {
-    private:
-
+class Command
+{
     public:
 		virtual ~Command() {}
 		virtual void execute(const std::string &args, Client *client) = 0;

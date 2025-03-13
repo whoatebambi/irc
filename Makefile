@@ -24,7 +24,7 @@ CC			=	/opt/homebrew/Cellar/gcc/14.2.0_1/bin/g++-14
 FLAG		=	-Wall -Wextra -Werror -std=c++98 -I/usr/local/include -L/usr/local/lib
 endif
 
-C_FILES		=	main.cpp Client.cpp Server.cpp Command.cpp CapCommand.cpp
+C_FILES		=	main.cpp Client.cpp Server.cpp Command.cpp CommandCap.cpp
 
 OBJ_DIR		=	builds
 

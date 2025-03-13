@@ -2,38 +2,41 @@
 
 Server &Server::getInstance()
 {
-    static Server instance;
-    return instance;
+	static Server instance;
+	return instance;
 }
 
 bool Server::isLive()
 {
-    if(this->_isLive)
-        return true;
-    return false;
+	if(this->_isLive)
+		return true;
+	return false;
 }
 
 void Server::shutdown()
 {
-    this->_isLive = false;
+	this->_isLive = false;
 }
 
-Server::Server(){this->_fd = -1;} // Server::Server() : _fd(-1) {}
-Server::~Server(){}
-Server::Server(Server const &src){*this = src;}
-Server &Server::operator=(Server const &src){
-	if (this != &src){
-		this->port = src.port;
-		this->_fd = src._fd;
-		this->clientsTable = src.clientsTable;
-		// this->fdTable = src.fdTable;
-	}
-	return (*this);
+Server::Server(){ this->_fd = -1; }
+Server::~Server()
+{
+	std::cout << "Server::~Server DESTRUCTOR" << std::endl;
+	CloseFds();
+
+	// // Delete clients using index-based loop
+	// for (size_t i = 0; i < clientsTable.size(); ++i)
+	//     delete clientsTable[i];
+	// clientsTable.clear();
+
+	// Delete clients using iterator-based loop
+	for (std::vector<Client*>::iterator it = clientsTable.begin(); it != clientsTable.end(); ++it)
+		delete *it;
+	clientsTable.clear();
 }
 
-
-
-void Server::CloseFds() {
+void Server::CloseFds()
+{
 	for(size_t i = 0; i < clientsTable.size(); i++){
 		std::cout << "Client <" << clientsTable[i]->getFd() << "> Disconnected" << std::endl;
 		close(clientsTable[i]->getFd());
@@ -44,7 +47,8 @@ void Server::CloseFds() {
 	}
 }
 
-void Server::Init() {
+void Server::Init()
+{
 	this->_isLive = true;
 	this->port = 4444;
 	this->_fd = socket(AF_INET, SOCK_STREAM, 0); // Create a socket
@@ -77,49 +81,54 @@ void Server::Init() {
 	std::cout << "Server <" << this->_fd << "> listening on port " << port << "\n";
 }
 
-void Server::Monitor() {
+void Server::Monitor()
+{
 	struct epoll_event events[42];
 
 	int event_count = epoll_wait(this->epoll_fd, events, MAX_EVENTS, -1); // check values
 	if (event_count == -1)
-        return (handleEpollWaitError());
+		return (handleEpollWaitError());
 
 	for (int i = 0; i < event_count; i++)
 	{
-        if (events[i].events & EPOLLIN)
-            handleEpollIn(events[i]);
-        else if (events[i].events & (EPOLLERR | EPOLLHUP))
-            handleEpollError(events[i]);
-    }
+		if (events[i].events & EPOLLIN)
+			handleEpollIn(events[i]);
+		else if (events[i].events & (EPOLLERR | EPOLLHUP))
+			handleEpollError(events[i]);
+	}
 }	
 
-void Server::handleEpollWaitError() {
-    if (isLive())
-        throw std::runtime_error("epoll_wait() failed");
+void Server::handleEpollWaitError()
+{
+	if (isLive())
+		throw std::runtime_error("epoll_wait() failed");
 }
 
-void Server::handleEpollIn(const epoll_event &event) {
+void Server::handleEpollIn(const epoll_event &event)
+{
 	if (event.data.fd == this->_fd)
 		AcceptNewClient();
-    else
+	else
 		handleClientData(event);
 }
 
-void Server::handleClientData(const epoll_event &event) {
-    int fd = event.data.fd;
-    for (size_t j = 0; j < clientsTable.size(); ++j)
+void Server::handleClientData(const epoll_event &event)
+{
+	int fd = event.data.fd;
+	for (size_t j = 0; j < clientsTable.size(); ++j)
 	{
-        if (clientsTable[j]->getFd() == fd) {
-            clientsTable[j]->ParseDataClient(fd);
-            break;
-        }
-    }
+		if (clientsTable[j]->getFd() == fd) {
+			clientsTable[j]->ParseDataClient(fd);
+			break;
+		}
+	}
 }
 
-void Server::handleEpollError(const epoll_event &event) {
+void Server::handleEpollError(const epoll_event &event)
+{
 	std::cerr << "Epoll error on fd: " << event.data.fd << std::endl;
 	// unsubscribe(((MainSocket *)events[i].data.ptr)->getFd());
-    RemoveClient(event.data.fd);
+	RemoveClient(event.data.fd);
 }
 
 void Server::AcceptNewClient()
@@ -132,36 +141,30 @@ void Server::AcceptNewClient()
 	if (fcntl(fdClient, F_SETFL, O_NONBLOCK) == -1) // fcntl() edits the fd and sets the new socket to non-blocking mode
 	{ std::cout << "fcntl() failed" << std::endl; return; }
 	struct epoll_event event;
-    event.events = EPOLLIN; // Set the event type for epoll(). EPOLLIN: The client socket is ready for reading
-    event.data.fd = fdClient;
-    if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fdClient, &event) == -1) // Add the client socket to the epoll instance
-    {
-        std::cout << "epoll_ctl() failed" << std::endl;
-        close(fdClient);
-        return;
-    }
-
-	///////////////////
+	event.events = EPOLLIN; // Set the event type for epoll(). EPOLLIN: The client socket is ready for reading
+	event.data.fd = fdClient;
+	if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, fdClient, &event) == -1) // Add the client socket to the epoll instance
+	{
+		std::cout << "epoll_ctl() failed" << std::endl;
+		close(fdClient);
+		return;
+	}
 	std::string ip = inet_ntoa(cliadd.sin_addr);
-    int port = ntohs(cliadd.sin_port);
-	Client* clientObject = new Client(fdClient, ip, port);//(newFd, ip, port);    
-	
-///////////////////
-// error: cannot convert ‘Client*’ to ‘const value_type&’ {aka ‘const Client&’}
+	int port = ntohs(cliadd.sin_port);
+	Client* clientObject = new Client(fdClient, ip, port);
 	clientsTable.push_back(clientObject); // Add the new client to the list of connected clients
-///////////////////	
-	
 	std::cout << "Client <" << fdClient << "> Connected" << std::endl;
 }
 
-
-void Server::RemoveClient(int fd){
-	for (size_t i = 0; i < this->clientsTable.size(); i++){
+void Server::RemoveClient(int fd)
+{
+	for (size_t i = 0; i < this->clientsTable.size(); i++)
+	{
 		if (this->clientsTable[i]->getFd() == fd)
-			{
-				this->clientsTable.erase(this->clientsTable.begin() + i);
-				return;
-			}
+		{
+			this->clientsTable.erase(this->clientsTable.begin() + i);
+			return;
+		}
 	}
 }
 
