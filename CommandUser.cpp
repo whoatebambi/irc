@@ -14,7 +14,8 @@ void CommandUser::execute(const std::string &args, Client *client)
 	std::string msg = "<<<<<< USERRERERERER";
 	msg += "\r\n";
 	send(client->getFd(), msg.c_str(), msg.size(), MSG_NOSIGNAL);
-	client->setUsername("FURRY <3");
+	client->setUsername(arg[0]);
+	std::cout << "OOOOOOO client->getUsername() = " << client->getUsername() << std::endl;
 	//this->_realName = arg[3];
 	//sendWelcome(client);
 }
