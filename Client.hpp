@@ -3,6 +3,8 @@
 #include "Server.hpp"
 #include "Command.hpp"
 #include "CommandCap.hpp"
+#include "CommandNick.hpp"
+#include "CommandUser.hpp"
 
 #include <cstdarg>
 #include <iostream>
@@ -16,6 +18,8 @@
 
 class Command;
 class CommandCap;
+class CommandNick;
+class CommandUser;
 
 class Client
 {
@@ -32,13 +36,14 @@ class Client
 		Client(int fd, std::string ip, int port);
 		~Client();
 
-		int getFd() const;
-		std::string getNickname() const;
+		int			getFd() const;
+		std::string	getNickname() const;
+		void		setNickname(const std::string &nickname);
 		std::string	getSaved() const;
+		std::string	getUsername() const;
+		void		setUsername(const std::string &username);
 		
-		void	ParseDataClient(int fd);
+		void	ParseDataClient();
 		void	parse(std::string &line);
 		std::string	ft_trim(const std::string &str);
-		void	NickCommand(const std::string &args);
-		void	UserCommand(const std::string &args);
 };

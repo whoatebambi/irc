@@ -21,7 +21,7 @@ void Server::shutdown()
 Server::Server(){ this->_fd = -1; }
 Server::~Server()
 {
-	std::cout << "Server::~Server DESTRUCTOR" << std::endl;
+	// std::cout << "Server <" << this->_fd << "> destructor called" << std::endl;
 	CloseFds();
 
 	// // Delete clients using index-based loop
@@ -118,7 +118,7 @@ void Server::handleClientData(const epoll_event &event)
 	for (size_t j = 0; j < clientsTable.size(); ++j)
 	{
 		if (clientsTable[j]->getFd() == fd) {
-			clientsTable[j]->ParseDataClient(fd);
+			clientsTable[j]->ParseDataClient();
 			break;
 		}
 	}

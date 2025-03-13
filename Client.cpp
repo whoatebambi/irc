@@ -9,11 +9,14 @@ Client::Client(int fd, std::string ip, int port)
 	this->_username = "";
 
 	this->_CommandMap["CAP"] = new CommandCap();
-	this->_CommandMap["NICK"] = new CommandCap();
+	this->_CommandMap["NICK"] = new CommandNick();
+	this->_CommandMap["USER"] = new CommandUser();
 }
 
 Client::~Client()
 {
+	// std::cout << "Client <" << this->_fd << "> destructor called" << std::endl;
+
 	for (std::map<std::string, Command*>::iterator it = this->_CommandMap.begin(); it != this->_CommandMap.end(); ++it) {
 		delete it->second;
 	}
@@ -22,9 +25,12 @@ Client::~Client()
 
 int	Client::getFd() const {return this->_fd;}
 std::string	Client::getNickname() const {return this->_nickname;}
-std::string	Client::getSaved() const {return this->_saved;}
+void Client::setNickname(const std::string &nickname) {this->_nickname = nickname;}
+std::string	Client::getSaved() const {return this->_saved; }
+std::string Client::getUsername() const { return this->_username; }
+void Client::setUsername(const std::string &username) { this->_username = username; }
 
-void	Client::ParseDataClient(int fd) // swap fd to void
+void	Client::ParseDataClient()
 {
 	std::string line;
 
@@ -36,14 +42,14 @@ void	Client::ParseDataClient(int fd) // swap fd to void
 
 	char buffer[1024];
 	memset(buffer, 0, sizeof(buffer));
-	ssize_t bytes = recv(fd, buffer, sizeof(buffer) - 1 , 0);
+	ssize_t bytes = recv(this->_fd, buffer, sizeof(buffer) - 1 , 0);
 	line += buffer;
 	if (line.empty() || bytes == -1)
 	{
-		return Server::getInstance().RemoveClient(fd); // swap fd for (CliSocket *client)
+		return Server::getInstance().RemoveClient(this->_fd); // swap fd for (CliSocket *client)
 		// RemoveClient(fd);
 		// RemoveFds(fd);
-		std::cout << "Client <" << fd << "> Disconnected" << std::endl;
+		std::cout << "Client <" << this->_fd << "> Disconnected" << std::endl;
 		// close(fd);
 	}
 	
@@ -79,9 +85,9 @@ void Client::parse(std::string &line)
 	if (cmd == "CAP")
 		this->_CommandMap["CAP"]->execute(args, this);
 	else if (cmd == "NICK")
-		NickCommand(args);
+		this->_CommandMap["NICK"]->execute(args, this);
 	else if (cmd == "USER")
-		UserCommand(args);
+		this->_CommandMap["USER"]->execute(args, this);
 	else
 		std::cout << "Unknown command: " << cmd << std::endl;
 
@@ -94,70 +100,4 @@ std::string Client::ft_trim(const std::string &str)
 {
 	size_t end = str.find_last_not_of("\r\n");
 	return (end == std::string::npos) ? "" : str.substr(0, end + 1);
-}
-
-void Client::NickCommand(const std::string &args)
-{
-	std::string arr = "[]{}\\|";
-
-	std::string oldnick = this->_nickname;
-	(void)args;
-
-	std::string msg = "<<<< NICKKKKKKKK ";
-	msg += "\r\n";
-	send(this->_fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
-	_nickname = "Warwick";
-}
-
-std::vector<std::string> splitArgs(const std::string &input)
-{
-	std::vector<std::string> vec;
-	std::istringstream iss(input);
-	std::string word;
-	//bool trailing = false;
-
-	while(iss >> word)
-	{
-		if (word[0] == ':')
-		{
-			//trailing = true;
-			vec.push_back(input.substr(input.find(':') + 1));
-			break;
-		}
-		vec.push_back(word);
-	}
-	return vec;
-	// (void)trailing;
-}
-
-void sendRpl(int fd, std::string err, ...)
-{
-	va_list args;
-	va_start(args, err);
-
-	std::string msg = "<<<<<< USERRERERERER";
-	msg += "\r\n";
-
-	send(fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
-	va_end(args);
-}
-
-void Client::UserCommand(const std::string &args)
-{
-	std::vector<std::string> arg = splitArgs(args);
-
-	//std::cout << "USER COMMAND EXECUTE DEBUG" << std::endl;
-
-	if (arg.size() < 4)
-		return sendRpl(this->_fd, "ERR_NEEDMOREPARAMS", this->_nickname.c_str());
-
-	if (!(this->_username.empty()))
-		return sendRpl(this->_fd, "ERR_ALREADYREGISTERED", this->_nickname.c_str());
-
-	std::string msg = "<<<<<< USERRERERERER";
-	msg += "\r\n";
-	send(this->_fd, msg.c_str(), msg.size(), MSG_NOSIGNAL);
-	this->_username = "FURRY <3";
-	//this->_realName = arg[3];
-	//sendWelcome(client);
 }
