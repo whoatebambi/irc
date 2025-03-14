@@ -46,7 +46,7 @@ class Client
 		std::string getSource();
 
 		int			getFd() const;
-		std::string	getNickname() const;
+		std::string	getNickname(); // removed const
 		void		setNickname(const std::string &nickname);
 		std::string	getSaved() const;
 		std::string	getUsername() const;

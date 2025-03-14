@@ -15,6 +15,14 @@
 #include <cstdlib>
 #include <map>
 
+#define INVERSE "\033[7m"
+#define RED "\033[31m"
+#define GREEN "\033[32m"
+#define BLUE "\033[34m"
+#define RESET "\033[0m"
+#define INVERSE_BG "\033[7;49m"
+#define BOLD "\033[1m"
+
 class Client;
 class Channel;
 

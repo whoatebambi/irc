@@ -2,9 +2,18 @@
 
 void CommandNick::execute(const std::string &args, Client *client)
 {
-	std::cout << "NICK command executed with args: " << args << std::endl;
+	std::cout << INVERSE_BG << BLUE << "NICK command executed with args: " BOLD << args << RESET << std::endl;
 	
 	std::string arr = "[]{}\\|";
+
+	if (args.empty())
+		return (sendMsg(client, ":431 :No nickname given")); // ERR_NONICKNAMEGIVEN
+	for (size_t i = 0; i < args.length(); ++i)
+	{
+		if (!isalnum(args[i]) && (arr.find(args[i]) == std::string::npos))
+			return (sendMsg(client, ":432 " + args + " :Erroneus nickname")); // ERR_ERRONEUSNICKNAME
+	}
+	// to do: ERR_NICKNAMEINUSE
 
 	std::string oldnick = client->getNickname();
 	const std::string oldmask = client->getSource();
@@ -13,8 +22,9 @@ void CommandNick::execute(const std::string &args, Client *client)
     const std::string newmask = client->getSource();
 	std::cout << "New mask: " << newmask << std::endl;
 
-    // Server::getInstance().updateList(oldmask, newmask);
+    // manage server->channelMap and add/remove mask from white list, ban list, ops list
 
-    // std::set<int> pairs = Server::getInstance().getSharedChans(client);
-    // broadcast(pairs, ":" + oldnick + " NICK " + args);
+    // find all fd of other clients that share a channel with this client
+
+    // broadcast nickname inside relevant channels
 }

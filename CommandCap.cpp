@@ -2,7 +2,7 @@
 
 void CommandCap::execute(const std::string &args, Client *client)
 {
-	std::cout << "CAP command executed with args: " << args << std::endl;
+	std::cout << INVERSE_BG << BLUE << "CAP command executed with args: " << BOLD << args << RESET << std::endl;
 	
 	if (args == "LS")
 		sendMsg(client, "CAP * LS :");

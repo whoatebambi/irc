@@ -2,7 +2,7 @@
 
 void CommandUser::execute(const std::string &args, Client *client)
 {
-	std::cout << "USER command executed with args: " << args << std::endl;
+	std::cout << INVERSE_BG << BLUE << "USER command executed with args: " BOLD << args << RESET << std::endl;
 
 	std::vector<std::string> arg = splitArgs(args);
 	if (arg.size() < 4)

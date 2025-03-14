@@ -26,7 +26,7 @@ Client::~Client()
 }
 
 int	Client::getFd() const {return this->_fd;}
-std::string	Client::getNickname() const {return this->_nickname;}
+std::string	Client::getNickname() {return this->_nickname;}
 void Client::setNickname(const std::string &nickname) {this->_nickname = nickname;}
 std::string	Client::getSaved() const {return this->_saved; }
 std::string Client::getUsername() const { return this->_username; }

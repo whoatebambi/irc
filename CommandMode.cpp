@@ -2,7 +2,7 @@
 
 void CommandMode::execute(const std::string &args, Client *client)
 {
-	std::cout << "MODE command executed with args: " << args << std::endl;
+	std::cout << INVERSE_BG << BLUE << "MODE command executed with args: " BOLD << args << RESET << std::endl;
 	
 	std::vector<std::string> arg = splitArgs(args);
 	if (arg.size() < 1)
