@@ -8,11 +8,14 @@ void handleSignal(int signal)
 	return ;
 }
 
-int	main(void)
+int	main(int argc, char **argv)
 {
 	try {
 		std::signal(SIGINT, handleSignal);
-		Server::getInstance().Init();
+		if (argc > 1)
+			Server::getInstance().Init(argv);
+		else
+			Server::getInstance().Init();
 		while(Server::getInstance().isLive())
 			Server::getInstance().Monitor();
 	}

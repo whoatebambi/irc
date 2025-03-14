@@ -5,6 +5,7 @@ Client::Client(int fd, std::string ip, int port)
 	this->_fd = fd;
 	this->_ipadd = ip;
 	this->_port = port;
+	this->_isAuth = false;
 	this->_nickname = "";
 	this->_username = "";
 	this->_realname = "";
@@ -13,6 +14,7 @@ Client::Client(int fd, std::string ip, int port)
 	this->_CommandMap["NICK"] = new CommandNick();
 	this->_CommandMap["USER"] = new CommandUser();
 	this->_CommandMap["MODE"] = new CommandMode();
+	this->_CommandMap["PASS"] = new CommandPass();
 }
 
 Client::~Client()
@@ -25,6 +27,8 @@ Client::~Client()
 	this->_CommandMap.clear();
 }
 
+bool Client::getIsAuth() const {return this->_isAuth;}
+void Client::setIsAuth() {this->_isAuth = true;}
 int	Client::getFd() const {return this->_fd;}
 std::string	Client::getNickname() {return this->_nickname;}
 void Client::setNickname(const std::string &nickname) {this->_nickname = nickname;}
@@ -95,6 +99,8 @@ void Client::parse(std::string &line)
 		this->_CommandMap["USER"]->execute(args, this);
 	else if (cmd == "MODE")
 		this->_CommandMap["MODE"]->execute(args, this);
+	else if (cmd == "PASS")
+		this->_CommandMap["PASS"]->execute(args, this);
 	else if (cmd == "PING")
 	{
 		std::cout << "RECEIVED PNG MESSAGGEEEEEEEEEE" << line;
@@ -116,3 +122,4 @@ std::string Client::getSource()
     std::string source = ":" + _nickname + "!" + _username + "@" + _ipadd;
     return (source);
 }
+
