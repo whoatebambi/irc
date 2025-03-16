@@ -6,7 +6,7 @@
 #    By: codespace <codespace@student.42.fr>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/01/15 12:29:01 by fcouserg          #+#    #+#              #
-#    Updated: 2025/03/16 13:46:44 by codespace        ###   ########.fr        #
+#    Updated: 2025/03/16 17:03:41 by codespace        ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -25,7 +25,7 @@ FLAG		=	-Wall -Wextra -Werror -std=c++98 -I/usr/local/include -L/usr/local/lib
 endif
 
 C_FILES		=	main.cpp Client.cpp Server.cpp Channel.cpp Command.cpp  \
-				CommandCap.cpp CommandNick.cpp CommandUser.cpp CommandMode.cpp CommandJoin.cpp \
+				CommandCap.cpp CommandNick.cpp CommandUser.cpp CommandMode.cpp CommandJoin.cpp CommandPass.cpp \
 				NumericReplies.cpp \
 
 OBJ_DIR		=	builds

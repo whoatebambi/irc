@@ -7,6 +7,7 @@
 #include "CommandUser.hpp"
 #include "CommandMode.hpp"
 #include "CommandJoin.hpp"
+#include "CommandPass.hpp"
 #include "Channel.hpp"
 
 #include <cstdarg>
@@ -25,12 +26,14 @@ class CommandNick;
 class CommandUser;
 class CommandMode;
 class CommandJoin;
+class CommandPass;
 
 class Client
 {
 	private:
 		int	_fd;
 		int	_port;
+		bool _isAuth;
 		std::string	_nickname;
 		std::string	_username;
 		std::string _realname;
@@ -47,6 +50,8 @@ class Client
 		std::string	ft_trim(const std::string &str);
 		std::string getSource();
 
+		bool getIsAuth() const;
+		void setIsAuth();
 		int			getFd() const;
 		std::string	getNickname(); // removed const
 		void		setNickname(const std::string &nickname);

@@ -30,9 +30,10 @@ class Channel;
 class Server
 {
 	private:
-		int	port;
+		int	_port;
 		int	_fd;
 		std::string	_serverName;
+		std::string _pass;
 		bool	_isLive; // need static?
 		std::vector<Client*>	clientsTable;
 		struct sockaddr_in	cliadd;
@@ -45,11 +46,14 @@ class Server
 		~Server();
 
 		static	Server& getInstance();
+		std::string getPass() const;
+		void setPass(std::string newPass);
 		bool	isLive();
 		void	shutdown();
 		void	Monitor();
 		void	CloseFds();
 		void	Init();
+		void	Init(char **argv);
 		void	AcceptNewClient();
 		void	RemoveClient(int fd);
 		void	handleClientData(const epoll_event &event);
