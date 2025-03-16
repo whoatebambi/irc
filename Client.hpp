@@ -8,6 +8,7 @@
 #include "CommandMode.hpp"
 #include "CommandJoin.hpp"
 #include "CommandPass.hpp"
+#include "CommandPing.hpp"
 #include "Channel.hpp"
 
 #include <cstdarg>
@@ -27,6 +28,7 @@ class CommandUser;
 class CommandMode;
 class CommandJoin;
 class CommandPass;
+class CommandPing;
 
 class Client
 {

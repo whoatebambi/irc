@@ -16,6 +16,7 @@ Client::Client(int fd, std::string ip, int port)
 	this->_CommandMap["MODE"] = new CommandMode();
 	this->_CommandMap["JOIN"] = new CommandJoin();
 	this->_CommandMap["PASS"] = new CommandPass();
+	this->_CommandMap["PING"] = new CommandPing();
 }
 
 Client::~Client()
@@ -105,11 +106,7 @@ void Client::parse(std::string &line)
 	else if (cmd == "PASS")
 		this->_CommandMap["PASS"]->execute(args, this);
 	else if (cmd == "PING")
-	{
-		std::cout << "RECEIVED PNG MESSAGGEEEEEEEEEE" << line;
-		std::string msg = "PONG " + args + "\r\n";
-    	send(this->_fd, (msg).c_str(), msg.size(), MSG_NOSIGNAL);	
-	}
+		this->_CommandMap["PING"]->execute(args, this);
 	else
 		std::cout << "Unknown command: " << cmd << std::endl;
 }
