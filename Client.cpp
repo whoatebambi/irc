@@ -13,6 +13,7 @@ Client::Client(int fd, std::string ip, int port)
 	this->_CommandMap["NICK"] = new CommandNick();
 	this->_CommandMap["USER"] = new CommandUser();
 	this->_CommandMap["MODE"] = new CommandMode();
+	this->_CommandMap["JOIN"] = new CommandJoin();
 }
 
 Client::~Client()
@@ -95,6 +96,8 @@ void Client::parse(std::string &line)
 		this->_CommandMap["USER"]->execute(args, this);
 	else if (cmd == "MODE")
 		this->_CommandMap["MODE"]->execute(args, this);
+	else if (cmd == "JOIN")
+		this->_CommandMap["JOIN"]->execute(args, this);
 	else if (cmd == "PING")
 	{
 		std::cout << "RECEIVED PNG MESSAGGEEEEEEEEEE" << line;
@@ -113,6 +116,6 @@ std::string Client::ft_trim(const std::string &str)
 
 std::string Client::getSource()
 {
-    std::string source = ":" + _nickname + "!" + _username + "@" + _ipadd;
+    std::string source = ":" + this->_nickname + "!" + this->_username + "@" + this->_ipadd;
     return (source);
 }

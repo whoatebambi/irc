@@ -6,6 +6,7 @@
 #include "CommandNick.hpp"
 #include "CommandUser.hpp"
 #include "CommandMode.hpp"
+#include "CommandJoin.hpp"
 #include "Channel.hpp"
 
 #include <cstdarg>
@@ -23,6 +24,7 @@ class CommandCap;
 class CommandNick;
 class CommandUser;
 class CommandMode;
+class CommandJoin;
 
 class Client
 {

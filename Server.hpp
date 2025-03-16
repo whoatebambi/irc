@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Client.hpp"
+#include "NumericReplies.hpp"
 
 #include <iostream>
 #include <cstring>
@@ -58,4 +59,5 @@ class Server
 		void	newChannel(Client *client, std::string chanName, std::string key);
 
 		std::string	getServerName() const;
+		std::map<std::string, Channel*>	getChannelMap() const;
 };

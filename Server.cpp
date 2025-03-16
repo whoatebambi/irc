@@ -19,11 +19,9 @@ void Server::shutdown()
 }
 
 Server::Server(){ this->_fd = -1; this->_serverName = "Servito"; }
+std::string Server::getServerName() const { return this->_serverName; }
 
-std::string Server::getServerName() const
-{
-	return this->_serverName;
-}
+std::map<std::string, Channel*> Server::getChannelMap() const { return this->_channelMap; }
 
 Server::~Server()
 {
@@ -84,6 +82,7 @@ void Server::Init()
 	event.data.fd = this->_fd;
 	if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, this->_fd, &event) == -1)
 		throw std::runtime_error("epoll_ctl() failed");
+	NumericReplies::initErrorMessages();
 	std::cout << "Server <" << this->_fd << "> listening on port " << port << "\n";
 }
 
@@ -158,12 +157,13 @@ void Server::RemoveClient(int fd)
 	}
 }
 
-void Server::newChannel(Client *client, std::string chanName, std::string key)
+void Server::newChannel(Client *client, std::string chanName, std::string password)
 {
-    Channel *newChan = new Channel(client, chanName, key);
+    Channel *newChan = new Channel(client, chanName, password);
     _channelMap.insert(std::make_pair(chanName, newChan));
-    // newChan->getFounderMask() = client->getSource();
-    // newChan->joinChan(client, chanName, key);
+    newChan->setFounderMask(client->getSource());
+	// std::cout << "Founder mask for channel " << chanName << ": " << newChan->getFounderMask() << std::endl;
+    newChan->joinChannel(client, chanName, password);
 }
 
 void Server::handleEpollWaitError()
