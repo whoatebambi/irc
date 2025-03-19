@@ -32,3 +32,14 @@ void Channel::joinChannel(Client *client, std::string channelName, std::string k
 	CommandJoin commandJoin;
     commandJoin.broadcast(this->_clientsSet, msg);
 }
+
+Channel* Channel::findChannel(std::string target)
+{
+	std::map<std::string, Channel*> _channelMapLocal = Server::getInstance().getChannelMap();
+	for (std::map<std::string, Channel*>::iterator it = _channelMapLocal.begin(); it != _channelMapLocal.end(); ++it)
+	{
+		if (it->first == target)
+			return it->second;
+	}
+	return NULL;
+}

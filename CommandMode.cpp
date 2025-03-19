@@ -3,40 +3,35 @@
 void CommandMode::execute(const std::string &args, Client *client)
 {
 	std::cout << INVERSE_BG << BLUE << "MODE command executed with args: " BOLD << args << RESET << std::endl;
-	
-	std::vector<std::string> arg = splitArgs(args);
+
+	std::vector<std::string> arg = CommandMode::splitArgs(args);
 	if (arg.size() < 1)
+		return (NumericReplies::sendNumReply(client, ERR_NEEDMOREPARAMS, "MODE"));
+
+	std::string target = arg[0];
+	if (target == client->getNickname() && (arg.size() == 1 || arg[1] == "+i"))
+		return (NumericReplies::sendNumReply(client, RPL_UMODEIS, "+iiiiii"));
+
+	refactorTarget(target);
+	// std::cout << BLUE << "target = " << target << RESET << std::endl;
+	Channel *channel = Channel::findChannel(target);
+	if (!channel)
+		return (NumericReplies::sendNumReply(client, ERR_NOSUCHCHANNEL, target));
+
+	if (arg.size() == 1)
+		return (NumericReplies::sendNumReply(client, RPL_CHANNELMODEIS, target, "+nrt"));
+		// std::string getChannelMode(Client *client, std::string target)
+
+	if (client->getSource() != channel->getFounderMask())// && !client->isInList(chan->getOpsList()))
 	{
-		std::cout << "Not enough parameters" << std::endl;
-		return;
+		std::cout << BLUE << client->getSource() << " != " << channel->getFounderMask() << RESET << std::endl;
+		return (NumericReplies::sendNumReply(client, ERR_CHANOPRIVSNEEDED, target));
 	}
-	if (arg[0] == client->getNickname())
-	{
-		std::string serverName = Server::getInstance().getServerName();
-		std::string nickname = client->getNickname();
-		std::string msg = ":" + serverName + " 221 " + nickname + " +i";
-		std::cout << "msg = " << msg << std::endl;
-		sendMsg(client, msg.c_str());
-	}
+	
 }
 
-std::vector<std::string> CommandMode::splitArgs(const std::string &input)
+void CommandMode::refactorTarget(std::string &target)
 {
-	std::vector<std::string> vec;
-	std::istringstream iss(input);
-	std::string word;
-	//bool trailing = false;
-
-	while(iss >> word)
-	{
-		if (word[0] == ':')
-		{
-			//trailing = true;
-			vec.push_back(input.substr(input.find(':') + 1));
-			break;
-		}
-		vec.push_back(word);
-	}
-	return vec;
-	// (void)trailing;
+	if (!target.empty() && target[0] != '#')
+		target = "#" + target;
 }

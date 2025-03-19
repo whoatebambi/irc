@@ -25,4 +25,5 @@ class Channel
 
 		void		setFounderMask(const std::string &founderMask);
 		std::string	getFounderMask() const;
+		static Channel*	findChannel(std::string target);
 };

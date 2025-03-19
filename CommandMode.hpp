@@ -11,5 +11,5 @@ class CommandMode : public Command
 {
 	public:
 		void execute(const std::string &args, Client *client);
-		std::vector<std::string>	splitArgs(const std::string &input);
+		void	refactorTarget(std::string &target);
 };
