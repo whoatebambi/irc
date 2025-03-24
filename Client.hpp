@@ -9,6 +9,7 @@
 #include "CommandJoin.hpp"
 #include "CommandPass.hpp"
 #include "CommandPing.hpp"
+#include "CommandPrivMsg.hpp"
 #include "Channel.hpp"
 
 #include <cstdarg>
@@ -50,10 +51,10 @@ class Client
 		void	ParseDataClient();
 		void	parse(std::string &line);
 		std::string	ft_trim(const std::string &str);
+		
 		std::string getSource();
-
-		bool getIsAuth() const;
-		void setIsAuth();
+		bool 		getIsAuth() const;
+		void 		setIsAuth();
 		int			getFd() const;
 		std::string	getNickname(); // removed const
 		void		setNickname(const std::string &nickname);

@@ -46,6 +46,7 @@ class Server
 		~Server();
 
 		static	Server& getInstance();
+		std::vector<Client *> getClients() const;
 		std::string getPass() const;
 		void setPass(std::string newPass);
 		bool	isLive();

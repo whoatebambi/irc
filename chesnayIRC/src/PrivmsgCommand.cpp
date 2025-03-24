@@ -47,8 +47,8 @@ void	PrivmsgCommand::execute(const std::string &args, CliSocket *client)
 				if (vecArgs[0] == (*it2)->getNick())
 				{
 					msg = client->getSource() + " PRIVMSG " + vecArgs[0] + " " + textmsg;
-					sendMsg((*it2), msg);
 					break ;
+					sendMsg((*it2), msg);
 				}
 			}
 			if (it2 == vecClients.end())

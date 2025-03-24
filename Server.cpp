@@ -6,6 +6,8 @@ Server &Server::getInstance()
 	return (instance);
 }
 
+std::vector<Client *> Server::getClients() const {return this->clientsTable;}
+
 std::string Server::getPass() const {
 
 	return this->_pass;

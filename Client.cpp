@@ -17,6 +17,7 @@ Client::Client(int fd, std::string ip, int port)
 	this->_CommandMap["JOIN"] = new CommandJoin();
 	this->_CommandMap["PASS"] = new CommandPass();
 	this->_CommandMap["PING"] = new CommandPing();
+	this->_CommandMap["PRIVMSG"] = new CommandPrivMsg();
 }
 
 Client::~Client()
@@ -92,21 +93,8 @@ void Client::parse(std::string &line)
 	std::string cmd = line.substr(0, pos);
 	if (pos != std::string::npos) 
 		{args = ft_trim(line.substr(pos + 1));}
-
-	if (cmd == "CAP")
-		this->_CommandMap["CAP"]->execute(args, this);
-	else if (cmd == "NICK")
-		this->_CommandMap["NICK"]->execute(args, this);
-	else if (cmd == "USER")
-		this->_CommandMap["USER"]->execute(args, this);
-	else if (cmd == "MODE")
-		this->_CommandMap["MODE"]->execute(args, this);
-	else if (cmd == "JOIN")
-		this->_CommandMap["JOIN"]->execute(args, this);
-	else if (cmd == "PASS")
-		this->_CommandMap["PASS"]->execute(args, this);
-	else if (cmd == "PING")
-		this->_CommandMap["PING"]->execute(args, this);
+	if (this->_CommandMap.find(cmd) != this->_CommandMap.end())
+		this->_CommandMap[cmd]->execute(args, this);
 	else
 		std::cout << "Unknown command: " << cmd << std::endl;
 }

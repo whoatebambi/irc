@@ -3,8 +3,8 @@
 
 void Command::sendMsg(Client *client, std::string msg)
 {
-	std::cout << INVERSE_BG << RED << ">>> " << BOLD << msg << RESET << std::endl;
-	msg += "\r\n";
+    msg += "\r\n";
+	std::cout << INVERSE_BG << RED << "sendMsg ->" << msg << RESET << std::endl;
 	send(client->getFd(), msg.c_str(), msg.size(), MSG_NOSIGNAL);
 }
 
@@ -32,14 +32,16 @@ std::vector<std::string> Command::splitArgs(const std::string &input)
 	std::vector<std::string> vec;
 	std::istringstream iss(input);
 	std::string word;
+    bool trailing = false;
 
 	while(iss >> word)
 	{
-		// if (word[0] == ':')
-		// {
-		// 	vec.push_back(input.substr(input.find(':') + 1));
-		// 	break;
-		// }
+		if (!trailing && word[0] == ':')
+		{
+            trailing = true;
+		 	vec.push_back(input.substr(input.find(':') + 1));
+		 	break;
+		}
 		vec.push_back(word);
 	}
 	return vec;
