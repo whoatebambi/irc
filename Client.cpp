@@ -105,6 +105,8 @@ std::string Client::ft_trim(const std::string &str)
 	return (end == std::string::npos) ? "" : str.substr(0, end + 1);
 }
 
+bool Client::isInList(std::set<int> list) { return list.find(this->getFd()) != list.end(); }
+
 std::string Client::getSource()
 {
     std::string source = ":" + this->_nickname + "!" + this->_username + "@" + this->_ipadd;

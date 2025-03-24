@@ -22,7 +22,9 @@ class Channel
         Channel(Client *client, std::string name, std::string key);
         ~Channel();
 		void	joinChannel(Client *client, std::string channelName, std::string key);
+        static void    removeFromList(std::set<int> &list, int fd);
 
 		void		setFounderMask(const std::string &founderMask);
 		std::string	getFounderMask() const;
+        std::set<int> &getMembers();
 };

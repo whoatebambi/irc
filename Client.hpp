@@ -48,9 +48,10 @@ class Client
 		Client(int fd, std::string ip, int port);
 		~Client();
 
-		void	ParseDataClient();
-		void	parse(std::string &line);
+		void		ParseDataClient();
+		void		parse(std::string &line);
 		std::string	ft_trim(const std::string &str);
+		bool 		isInList(std::set<int> list);
 		
 		std::string getSource();
 		bool 		getIsAuth() const;

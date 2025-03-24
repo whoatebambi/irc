@@ -6,7 +6,7 @@
 /*   By: jpointil <jpointil@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 12:02:21 by jpointil          #+#    #+#             */
-/*   Updated: 2025/03/24 15:31:45 by jpointil         ###   ########.fr       */
+/*   Updated: 2025/03/24 16:39:41 by jpointil         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,32 @@ void CommandPrivMsg::execute(const std::string &args, Client *client) {
 
         if (argsVec[0][0] == '#' || argsVec[0][0] == '&') {
 
-            //pour le channel
-            std::cout << GREEN << INVERSE << "Channel :3" << RESET << std::endl;            
+            std::cout << GREEN << INVERSE << "Channel :3" << RESET << std::endl;
+            std::map<std::string, Channel *> channel = Server::getInstance().getChannelMap();
+            std::map<std::string, Channel *>::const_iterator it = channel.begin();
+            for ( ; it != channel.end(); ++it) {
+
+                if (sameString(argsVec[0], it->first)) {
+
+                    if (client->isInList(it->second->getMembers())) {
+
+                        msg = client->getSource() + " PRIVMSG " + argsVec[0] + " :" + msgArg;
+                        std::set<int> tmplist = it->second->getMembers();
+                        Channel::removeFromList(tmplist, client->getFd());
+                        broadcast(tmplist, msg);
+                        break ;
+                    }
+                    else {
+
+                        msg = client->getNickname() + argsVec[0];
+                        return sendRpl(client, ERR_CANOTSENDTOCHAN, msg.c_str());
+                    }
+                }
+            }
+            if (it == channel.end()) {
+                msg = client->getNickname() + argsVec[0];
+                return sendRpl(client, ERR_NOSUCHCHANNEL, msg.c_str());
+            }
         }
         else {
 

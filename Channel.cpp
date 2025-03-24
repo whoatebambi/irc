@@ -19,6 +19,8 @@ std::string Channel::getFounderMask() const
 	return this->_founderMask;
 }
 
+std::set<int> &Channel::getMembers() { return this->_clientsSet; }
+
 void Channel::joinChannel(Client *client, std::string channelName, std::string key)
 {
 	(void)key;
@@ -32,3 +34,5 @@ void Channel::joinChannel(Client *client, std::string channelName, std::string k
 	CommandJoin commandJoin;
     commandJoin.broadcast(this->_clientsSet, msg);
 }
+
+void Channel::removeFromList(std::set<int> &list, int fd) { list.erase(fd);}
