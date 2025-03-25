@@ -2,10 +2,10 @@
 
 void CommandJoin::execute(const std::string &args, Client *client)
 {
-	std::cout << INVERSE_BG << BLUE << "JOIN command executed with args: " BOLD << args << RESET << std::endl;
+	std::cout << INVERSE_BG << BLUE << "JOIN args: " BOLD << args << RESET << std::endl;
 
 	if (args.empty()) // ALREADY MANAGED BY IRSSI | it will not send an empty command
-		return (NumericReplies::sendNumReply(client, ERR_NEEDMOREPARAMS, "JOIN"));
+		return (Reply::sendNumReply(client, ERR_NEEDMOREPARAMS, "JOIN"));
 		
 	std::map<std::string, std::string> argMap = parseArgs(args, client);
 	if (argMap.empty())
@@ -66,8 +66,8 @@ std::map<std::string, std::string> CommandJoin::parseArgs(const std::string &arg
 	{
 		if (isValidChannelString(channelVector[i]) == false)
 		{
-			NumericReplies::sendNumReply(client, ERR_BADCHANMASK, channelVector[i]);
-			NumericReplies::sendNumReply(client, ERR_NOSUCHCHANNEL, channelVector[i]); // forces IRSSI behaviour
+			Reply::sendNumReply(client, ERR_BADCHANMASK, channelVector[i]);
+			Reply::sendNumReply(client, ERR_NOSUCHCHANNEL, channelVector[i]); // forces IRSSI behaviour
 			return (mapArgs);
 		}		
 	}
@@ -75,7 +75,7 @@ std::map<std::string, std::string> CommandJoin::parseArgs(const std::string &arg
     {
         std::vector<std::string> keys = splitString(argsVector[1], ',');
         if (channelVector.size() != keys.size())
-			return (NumericReplies::sendNumReply(client, ERR_NOSUCHCHANNEL, "ERROR"), mapArgs);
+			return (Reply::sendNumReply(client, ERR_NOSUCHCHANNEL, "ERROR"), mapArgs);
 		replaceDefaultKey(keys); // Handles IRSSI behaviour that sends key = "x" instead of key = ""
 		// !!! need to handle if "x" is added by IRSSI in the channelName column "/join #AAA,,#CCC aaa,bbb,ccc"
 
@@ -83,8 +83,8 @@ std::map<std::string, std::string> CommandJoin::parseArgs(const std::string &arg
         {
             if (!isValidKeyString(keys[i]))
 			{
-				NumericReplies::sendNumReply(client, ERR_BADCHANMASK, channelVector[i]);
-				NumericReplies::sendNumReply(client, ERR_NOSUCHCHANNEL, channelVector[i]); // forces IRSSI behaviour
+				Reply::sendNumReply(client, ERR_BADCHANMASK, channelVector[i]);
+				Reply::sendNumReply(client, ERR_NOSUCHCHANNEL, channelVector[i]); // forces IRSSI behaviour
 				return (mapArgs);
 			}	
         }

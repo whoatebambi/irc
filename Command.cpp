@@ -35,11 +35,11 @@ std::vector<std::string> Command::splitArgs(const std::string &input)
 
 	while(iss >> word)
 	{
-		// if (word[0] == ':')
-		// {
-		// 	vec.push_back(input.substr(input.find(':') + 1));
-		// 	break;
-		// }
+		if (word[0] == ':')
+		{
+			vec.push_back(input.substr(input.find(':') + 1));
+			break;
+		}
 		vec.push_back(word);
 	}
 	return vec;
