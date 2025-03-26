@@ -14,6 +14,18 @@ Channel::Channel(Client *client, std::string name, std::string key)
 
 Channel::~Channel() {}
 
+void Channel::setFounderMask(const std::string &founderMask)
+{
+	this->_founderMask = founderMask;
+}
+
+std::string Channel::getFounderMask() const
+{
+	return this->_founderMask;
+}
+
+std::set<int> &Channel::getMembers() { return this->_clientsSet; }
+
 void Channel::joinChannel(Client *client, std::string channelName, std::string key)
 {
 	(void)key;
@@ -27,6 +39,7 @@ void Channel::joinChannel(Client *client, std::string channelName, std::string k
 	Reply::sendBroadcast(this->_clientsSet, client, msg);
 }
 
+void Channel::removeFromList(std::set<int> &list, int fd) { list.erase(fd);}
 // Find a channel by name (static)
 Channel* Channel::findChannel(std::string target)
 {

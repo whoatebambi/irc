@@ -26,6 +26,7 @@ class Channel
         Channel(Client *client, std::string name, std::string key);
         ~Channel();
 		void	joinChannel(Client *client, std::string channelName, std::string key);
+        static void    removeFromList(std::set<int> &list, int fd);
 
 		static Channel*	findChannel(std::string target);
 
@@ -34,7 +35,7 @@ class Channel
 		std::set<int>	get_clientsSet() const;
 
 		std::string	getFounderMask() const;
-
+    std::set<int> &getMembers();
 		void setInviteOnly(bool mode);
 		bool isInviteOnly() const;
 

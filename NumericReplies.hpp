@@ -10,6 +10,9 @@
 
 
 //////////// Nick message | Numeric Replies:
+#define ERR_NOSUCHNICK        401   // "<client> <nick> :No such nick/channel"
+#define ERR_CANOTSENDTOCHAN   404   // "<client> <channel> :Cannot send to channel"
+#define ERR_NOSUCHCHANNEL     403   // "<client> <channel> :No such channel"
 #define ERR_NONICKNAMEGIVEN	431	// ":No nickname given"
 // Returned when a nickname parameter expected for a command
 // and isn't found.
