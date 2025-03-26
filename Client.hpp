@@ -50,7 +50,7 @@ class Client
 		void	ParseDataClient();
 		void	parse(std::string &line);
 		std::string	ft_trim(const std::string &str);
-		std::string getSource();
+		std::string getSource() const;
 
 		bool getIsAuth() const;
 		void setIsAuth();

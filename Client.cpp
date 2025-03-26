@@ -40,7 +40,6 @@ void Client::setUsername(const std::string &username) { this->_username = userna
 std::string Client::getRealname() const { return this->_realname; }
 void Client::setRealname(const std::string &realname) { this->_realname = realname; }
 
-
 void	Client::ParseDataClient()
 {
 	std::string line;
@@ -117,7 +116,7 @@ std::string Client::ft_trim(const std::string &str)
 	return (end == std::string::npos) ? "" : str.substr(0, end + 1);
 }
 
-std::string Client::getSource()
+std::string Client::getSource () const
 {
     std::string source = ":" + this->_nickname + "!" + this->_username + "@" + this->_ipadd;
     return (source);

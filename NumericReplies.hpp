@@ -27,7 +27,12 @@
 #define ERR_BADCHANNELKEY	475	// "<channel> :Cannot join channel (+k)"                        
 #define ERR_CHANNELISFULL	471 // "<channel> :Cannot join channel (+l)"
 #define ERR_NOSUCHCHANNEL	403	// "<channel name> :No such channel"
-#define ERR_BADCHANMASK 476
+#define ERR_BADCHANMASK		476
+
+#define RPL_UMODEIS			221 // Sent to a client to inform that client of their currently-set user modes.
+#define RPL_CHANNELMODEIS	324
+#define ERR_CHANOPRIVSNEEDED	482
+
 
 #define INVERSE "\033[7m"
 #define RED "\033[31m"
