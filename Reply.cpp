@@ -7,7 +7,7 @@ void Reply::sendReply(Client *client, std::string msg)
 	send(client->getFd(), msg.c_str(), msg.size(), MSG_NOSIGNAL);
 }
 
-void Reply::sendBroadcast(std::set<int> fds, const Client* sender, std::string msg)
+void Reply::sendBroadcast(std::set<int> fds, Client* sender, std::string msg)
 {
 	std::string msgFull = ":" + sender->getSource() + " " + msg + "\r\n";
     for (std::set<int>::const_iterator it = fds.begin(); it != fds.end(); ++it)
@@ -23,6 +23,10 @@ static std::map<int, std::string> replies;
 
 void  Reply::initReplies()
 {
+	//////////// PASS replies & errors:
+	replies.insert(std::make_pair(ERR_NEEDMOREPARAMS, "Not enough parameters"));
+	replies.insert(std::make_pair(ERR_ALREADYREGISTRED, "You may not reregister"));
+
 	//////////// NICK replies & errors:
 	replies.insert(std::make_pair(ERR_NONICKNAMEGIVEN, "No nickname given"));
 	replies.insert(std::make_pair(ERR_ERRONEUSNICKNAME, "Erroneus nickname"));
@@ -31,7 +35,6 @@ void  Reply::initReplies()
 
 	//////////// JOIN replies & errors:
 	replies.insert(std::make_pair(ERR_TOOMANYCHANNELS, "You have joined too many channels"));
-	replies.insert(std::make_pair(ERR_NEEDMOREPARAMS, "Not enough parameters"));
 	replies.insert(std::make_pair(ERR_CHANNELISFULL, "Cannot join channel (+l)"));
 	replies.insert(std::make_pair(ERR_INVITEONLYCHAN, "Cannot join channel (+i)"));
 	replies.insert(std::make_pair(ERR_BANNEDFROMCHAN, "Cannot join channel (+b)"));
@@ -46,6 +49,21 @@ void  Reply::initReplies()
 	replies.insert(std::make_pair(ERR_UNKNOWNMODE, "is unknown mode char to me"));
 	replies.insert(std::make_pair(ERR_CHANOPRIVSNEEDED, "You're not channel operator"));
 	replies.insert(std::make_pair(ERR_USERSDONTMATCH, "Cant change mode for other users"));
+
+	//////////// PRIVMSG replies & errors:
+	replies.insert(std::make_pair(ERR_CANNOTSENDTOCHAN, "Cannot send to channel"));
+	replies.insert(std::make_pair(ERR_TOOMANYTARGETS, "Duplicate recipients. No message delivered."));
+	replies.insert(std::make_pair(ERR_NORECIPIENT, "No recipient given ")); // ":No recipient given (<command>)"
+	replies.insert(std::make_pair(ERR_NOTEXTTOSEND, "No text to send"));
+
+	//////////// TOPIC replies & errors:
+	replies.insert(std::make_pair(RPL_NOTOPIC, "No topic is set"));
+	replies.insert(std::make_pair(RPL_TOPIC, " ")); // test it
+
+	//////////// INVITE replies & errors:
+	replies.insert(std::make_pair(RPL_AWAY, " ")); // test it
+	replies.insert(std::make_pair(ERR_USERONCHANNEL, "is already on channel"));
+
 }
 
 // Get error message from map

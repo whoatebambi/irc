@@ -2,24 +2,24 @@
 
 void CommandMode::execute(const std::string &args, Client *client)
 {
-	std::cout << INVERSE_BG << BLUE << "MODE args: " BOLD << args << RESET << std::endl;
+	// std::cout << INVERSE_BG << BLUE << "MODE args: " BOLD << args << RESET << std::endl;
 
-	std::vector<std::string> arg = CommandMode::splitArgs(args);
-	if (arg.size() < 1)
+	if (args.empty())
 		return (Reply::sendNumReply(client, ERR_NEEDMOREPARAMS, "MODE"));
 
+	std::vector<std::string> arg = splitArgs(args);
 	std::string target = arg[0];
 	if (target == client->getNickname())
 	{
-		if (arg.size() == 1)
-			return (Reply::sendNumReply(client, RPL_UMODEIS, "+iiiiii"));
-		return (Reply::sendNumReply(client, ERR_USERSDONTMATCH, "OR FOR SELF")); // custom because we don't handle user mode
+		if (arg.size() == 1 || (arg.size() == 2 && arg[1] == "+i"))
+			return (Reply::sendNumReply(client, RPL_UMODEIS, "+i"));
+		return (Reply::sendNumReply(client, ERR_USERSDONTMATCH, "Can't change mode for self.")); // custom because we don't handle user mode
 	}
 
 	refactorTarget(target); // or remove # ?
 	Channel *channel = Channel::findChannel(target);
 	if (!channel)
-		return (Reply::sendNumReply(client, ERR_NOSUCHCHANNEL, target));
+		return (Reply::sendNumReply(client, ERR_NOSUCHNICK, target));
 	if (!channel->isUserInChannel(client))
 		return (Reply::sendNumReply(client, ERR_NOTONCHANNEL, target));
 	
@@ -182,5 +182,4 @@ std::vector<std::string> CommandMode::splitArgs(const std::string &input)
 	return vec;
 }
 
-// /NAMES to show @ ops.
 // Automatic op assignment when the last op leaves or disconnects (to prevent a “dead” channel).

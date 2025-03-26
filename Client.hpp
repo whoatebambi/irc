@@ -42,7 +42,7 @@ class Client
 		std::string _realname;
 		std::string	_ipadd;
 		std::string	_saved;
-		std::map<std::string, Command*>	_CommandMap;
+		std::map<std::string, Command*>	_CommandMap; // should be in server?
 
 	public:
 		Client(int fd, std::string ip, int port);

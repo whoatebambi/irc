@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: jpointil <jpointil@student.42.fr>          +#+  +:+       +#+         #
+#    By: codespace <codespace@student.42.fr>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/01/15 12:29:01 by fcouserg          #+#    #+#              #
-#    Updated: 2025/03/24 11:38:47 by jpointil         ###   ########.fr        #
+#    Updated: 2025/03/26 14:16:40 by codespace        ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -26,7 +26,7 @@ endif
 
 C_FILES		=	main.cpp Client.cpp Server.cpp Channel.cpp Command.cpp  \
 				CommandCap.cpp CommandNick.cpp CommandUser.cpp CommandMode.cpp CommandJoin.cpp CommandPass.cpp \
-				CommandPing.cpp NumericReplies.cpp CommandPrivMsg.cpp Reply.cpp\
+				CommandPing.cpp CommandPrivMsg.cpp Reply.cpp\
 
 OBJ_DIR		=	builds
 

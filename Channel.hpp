@@ -35,7 +35,7 @@ class Channel
 		std::set<int>	get_clientsSet() const;
 
 		std::string	getFounderMask() const;
-    std::set<int> &getMembers();
+    	std::set<int> &getMembers();
 		void setInviteOnly(bool mode);
 		bool isInviteOnly() const;
 

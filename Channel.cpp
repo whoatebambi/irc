@@ -14,16 +14,6 @@ Channel::Channel(Client *client, std::string name, std::string key)
 
 Channel::~Channel() {}
 
-void Channel::setFounderMask(const std::string &founderMask)
-{
-	this->_founderMask = founderMask;
-}
-
-std::string Channel::getFounderMask() const
-{
-	return this->_founderMask;
-}
-
 std::set<int> &Channel::getMembers() { return this->_clientsSet; }
 
 void Channel::joinChannel(Client *client, std::string channelName, std::string key)

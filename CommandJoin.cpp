@@ -2,7 +2,7 @@
 
 void CommandJoin::execute(const std::string &args, Client *client)
 {
-	std::cout << INVERSE_BG << BLUE << "JOIN args: " BOLD << args << RESET << std::endl;
+	// std::cout << INVERSE_BG << BLUE << "JOIN args: " BOLD << args << RESET << std::endl;
 
 	if (args.empty()) // ALREADY MANAGED BY IRSSI | it will not send an empty command
 		return (Reply::sendNumReply(client, ERR_NEEDMOREPARAMS, "JOIN"));
