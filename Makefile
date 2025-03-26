@@ -26,7 +26,7 @@ endif
 
 C_FILES		=	main.cpp Client.cpp Server.cpp Channel.cpp Command.cpp  \
 				CommandCap.cpp CommandNick.cpp CommandUser.cpp CommandMode.cpp CommandJoin.cpp CommandPass.cpp \
-				CommandPing.cpp NumericReplies.cpp CommandPrivMsg.cpp \
+				CommandPing.cpp NumericReplies.cpp CommandPrivMsg.cpp Reply.cpp\
 
 OBJ_DIR		=	builds
 

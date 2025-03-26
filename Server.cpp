@@ -32,6 +32,7 @@ void Server::shutdown()
 
 Server::Server(){ this->_fd = -1; this->_serverName = "Servito"; }
 std::string Server::getServerName() const { return this->_serverName; }
+std::vector<Client*> Server::getClientsTable() const { return this->clientsTable; }
 
 std::map<std::string, Channel*> Server::getChannelMap() const { return this->_channelMap; }
 
@@ -133,7 +134,7 @@ void Server::Init()
 	event.data.fd = this->_fd;
 	if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, this->_fd, &event) == -1)
 		throw std::runtime_error("epoll_ctl() failed");
-	NumericReplies::initErrorMessages();
+	Reply::initReplies();
 	std::cout << "Server <" << this->_fd << "> listening on port " << _port << "\n";
 	std::cout << "password is : " << _pass << "\n";
 }
@@ -213,9 +214,28 @@ void Server::newChannel(Client *client, std::string chanName, std::string passwo
 {
     Channel *newChan = new Channel(client, chanName, password);
     _channelMap.insert(std::make_pair(chanName, newChan));
-    newChan->setFounderMask(client->getSource());
-	// std::cout << "Founder mask for channel " << chanName << ": " << newChan->getFounderMask() << std::endl;
+	std::cout << "Founder mask for channel " << chanName << ": " << newChan->getFounderMask() << std::endl;
     newChan->joinChannel(client, chanName, password);
+}
+
+Client *Server::findClient(std::string &nickname)
+{
+	for (size_t i = 0; i < clientsTable.size(); ++i)
+	{
+		if (clientsTable[i]->getNickname() == nickname)
+			return clientsTable[i];
+	}
+	return NULL;
+}
+
+bool	Server::isClient(std::string &nickname)
+{
+	for (size_t i = 0; i < clientsTable.size(); ++i)
+	{
+		if (clientsTable[i]->getNickname() == nickname)
+			return true;
+	}
+	return false;
 }
 
 void Server::handleEpollWaitError()
