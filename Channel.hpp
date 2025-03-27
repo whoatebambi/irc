@@ -19,6 +19,7 @@ class Channel
         std::set<Client*> _members;
 		bool _inviteOnly;
 		bool _topicLocked;
+		std::string _topic;
 		size_t _userLimit;
 		std::set<Client*> _operators;
 		std::set<Client*> _inviteList;
@@ -31,6 +32,9 @@ class Channel
         static void    removeFromList(std::set<int> &list, int fd);
 
 		static Channel*	findChannel(std::string target);
+
+		std::string	get_topic() const;
+		void set_topic(const std::string &topic);
 
 		std::string	getMembersNick() const;
     	size_t	get_membersCount() const;

@@ -46,11 +46,14 @@ void Channel::joinChannel(Client *client, std::string key)
 
 	Reply::sendBroadcast(get_membersFd(), client, " JOIN :" + getName());
 	
-    // Command::sendTopic(client, this); // RPL_TOPIC 332 "<channel> :<topic>"
-	// Reply::sendNumReply(client, RPL_TOPIC, getName(), "<topic>"); // RPL_NAMREPLY 353 "<channel> :[[@|+]<nick> [[@|+]<nick> [...]]]"
+	return (Reply::sendNumReply(client, RPL_TOPIC, get_topic()));
+
 	Reply::sendNumReply(client, RPL_NAMREPLY, "= " + getName() + getMembersNick());
 	Reply::sendNumReply(client, RPL_ENDOFNAMES, getName());
 }
+
+std::string	Channel::get_topic() const { return _topic; }
+void	Channel::set_topic(const std::string &topic) { _topic = topic; }
 
 std::string Channel::getMembersNick() const
 {
