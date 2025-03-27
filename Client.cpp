@@ -31,16 +31,22 @@ Client::~Client()
 	this->_CommandMap.clear();
 }
 
-bool Client::getIsAuth() const {return this->_isAuth;}
-void Client::setIsAuth() {this->_isAuth = true;}
-int	Client::getFd() const {return this->_fd;}
-std::string	Client::getNickname() {return this->_nickname;}
-void Client::setNickname(const std::string &nickname) {this->_nickname = nickname;}
+std::string	Client::get_nickname() const {return _nickname;}
+void		Client::set_nickname(const std::string &nickname)
+{
+	_nickname = nickname;
+	set_mask();
+}
+std::string	Client::get_mask() const { return _mask; }
+void		Client::set_mask() { _mask = ":" + _nickname + "!" + _username + "@" + _ipadd; }
+bool		Client::getIsAuth() const {return this->_isAuth;}
+void		Client::setIsAuth() {this->_isAuth = true;}
+int			Client::getFd() const {return this->_fd;}
 std::string	Client::getSaved() const {return this->_saved; }
-std::string Client::getUsername() const { return this->_username; }
-void Client::setUsername(const std::string &username) { this->_username = username; }
-std::string Client::getRealname() const { return this->_realname; }
-void Client::setRealname(const std::string &realname) { this->_realname = realname; }
+std::string	Client::getUsername() const { return this->_username; }
+void		Client::setUsername(const std::string &username) { this->_username = username; }
+std::string	Client::getRealname() const { return this->_realname; }
+void		Client::setRealname(const std::string &realname) { this->_realname = realname; }
 
 void	Client::ParseDataClient()
 {
@@ -107,9 +113,5 @@ std::string Client::ft_trim(const std::string &str)
 
 bool Client::isInList(const std::set<Client*> &list) const { return list.find(const_cast<Client*>(this)) != list.end();; }
 
-std::string Client::getSource()
-{
-    std::string source = ":" + this->_nickname + "!" + this->_username + "@" + this->_ipadd;
-    return (source);
-}
+
 

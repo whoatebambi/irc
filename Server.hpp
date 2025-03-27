@@ -64,7 +64,7 @@ class Server
 		void	newChannel(Client *client, std::string chanName, std::string key);
 
 		Client *findClient(std::string &nickname);
-		bool	isClient(std::string &nickname);
+		bool	isClient(std::string const &nickname);
 		std::vector<Client*>	getClientsTable() const ;
 		std::string	getServerName() const;
 		std::map<std::string, Channel*> const	&getChannelMap() const;

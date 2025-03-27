@@ -3,7 +3,7 @@
 Channel::Channel(Client *client, std::string name, std::string key)
 	: _name(name),
 	_key(key),
-	_founderMask(client->getSource()),
+	_founderMask(client->get_mask()),
 	_inviteOnly(false),
 	_topicLocked(false),
 	_userLimit(0)
@@ -63,7 +63,7 @@ std::string Channel::getMembersNick() const
 		str += " ";
 		if (isOperator(*it))
 			str += "@";
-		str += (*it)->getNickname();
+		str += (*it)->get_nickname();
 	}
 	// std::cout << "DEBUG getMembersNick() = " << str << std::endl;
 	return (str);

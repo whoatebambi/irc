@@ -22,15 +22,14 @@
 //////////// NICK replies & errors:
 #define ERR_NONICKNAMEGIVEN		431	// ✅ ":No nickname given"
 #define ERR_ERRONEUSNICKNAME	432	// ✅ "<nick> :Erroneus nickname"
-#define ERR_NICKNAMEINUSE		433 // "<nick> :Nickname is already in use"
-#define ERR_NICKCOLLISION		436 // "<nick> :Nickname collision KILL"
+#define ERR_NICKNAMEINUSE		433 // ✅ "<nick> :Nickname is already in use"
 
 //////////// USER replies & errors:
 #define ERR_NEEDMOREPARAMS		461	// ✅ "<command> :Not enough parameters"
 #define ERR_ALREADYREGISTRED	462 // ✅ :You may not reregister"
 
 //////////// JOIN replies & errors:
-#define RPL_TOPIC				332 // "<channel> :<topic>"
+#define RPL_TOPIC				332 // ✅ "<channel> :<topic>"
 #define RPL_NAMREPLY			353 // ✅ "<channel> :[[@|+]<nick> [[@|+]<nick> [...]]]"
 #define RPL_ENDOFNAMES			366 // ✅ "<channel> :End of /NAMES list"
 #define RPL_ENDOFBANLIST		368 // ✅ End of channel ban list

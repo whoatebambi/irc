@@ -12,4 +12,5 @@ void CommandUser::execute(const std::string &args, Client *client)
 
 	client->setUsername(arg[0]);
 	client->setRealname(arg[3]);
+	client->set_mask();
 }

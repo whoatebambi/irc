@@ -40,6 +40,7 @@ class Client
 		int	_port;
 		bool _isAuth;
 		std::string	_nickname;
+		std::string	_mask;
 		std::string	_username;
 		std::string _realname;
 		std::string	_ipadd;
@@ -55,12 +56,13 @@ class Client
 		std::string	ft_trim(const std::string &str);
 		bool	isInList(const std::set<Client*> &list) const ;
 		
-		std::string getSource();
+		void		set_mask();
+		std::string get_mask() const;
 		bool 		getIsAuth() const;
 		void 		setIsAuth();
 		int			getFd() const;
-		std::string	getNickname(); // removed const
-		void		setNickname(const std::string &nickname);
+		std::string	get_nickname() const;
+		void		set_nickname(const std::string &nickname);
 		std::string	getSaved() const;
 		std::string	getUsername() const;
 		void		setUsername(const std::string &username);

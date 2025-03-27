@@ -214,7 +214,7 @@ void Server::newChannel(Client *client, std::string chanName, std::string key)
 {
     Channel *newChan = new Channel(client, chanName, key);
     _channelMap.insert(std::make_pair(chanName, newChan));
-	newChan->getFounderMask() = client->getSource();
+	newChan->getFounderMask() = client->get_mask();
     newChan->joinChannel(client, key);
 }
 
@@ -222,17 +222,17 @@ Client *Server::findClient(std::string &nickname)
 {
 	for (size_t i = 0; i < clientsTable.size(); ++i)
 	{
-		if (clientsTable[i]->getNickname() == nickname)
+		if (clientsTable[i]->get_nickname() == nickname)
 			return clientsTable[i];
 	}
 	return NULL;
 }
 
-bool	Server::isClient(std::string &nickname)
+bool	Server::isClient(std::string const &nickname)
 {
 	for (size_t i = 0; i < clientsTable.size(); ++i)
 	{
-		if (clientsTable[i]->getNickname() == nickname)
+		if (clientsTable[i]->get_nickname() == nickname)
 			return true;
 	}
 	return false;
