@@ -4,7 +4,6 @@ void CommandPrivMsg::execute(const std::string &args, Client *client)
 {
 	std::vector<std::string> argsVec = splitArgs(args);
 	std::string msgArg = "";
-	std::string msg;
 
 	if (argsVec.size() > 1)
 		msgArg = argsVec[1];
@@ -20,10 +19,9 @@ void CommandPrivMsg::execute(const std::string &args, Client *client)
 				{
 					if (client->isInList(it->second->getMembers()))
 					{
-						std::set<int> tmplist = it->second->getMembers();
+						std::set<int> tmplist = it->second->get_membersFd();
 						Channel::removeFromList(tmplist, client->getFd());
-						msg = "PRIVMSG " + argsVec[0] + " :" + msgArg;
-						Reply::sendBroadcast(tmplist, client, msg);
+						Reply::sendBroadcast(tmplist, client, "PRIVMSG " + argsVec[0] + " :" + msgArg);  // check ":"
 						break ;
 					}
 					else

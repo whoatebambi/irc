@@ -20,3 +20,4 @@ void	replaceDefaultKey(std::vector<std::string> &keys);
 bool	isValidChannelString(const std::string &channel);
 bool	isValidKeyString(const std::string &key);
 bool	sameString(const std::string &s1, const std::string &s2);
+std::string toLower(const std::string &str);

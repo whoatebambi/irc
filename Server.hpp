@@ -67,5 +67,5 @@ class Server
 		bool	isClient(std::string &nickname);
 		std::vector<Client*>	getClientsTable() const ;
 		std::string	getServerName() const;
-		std::map<std::string, Channel*>	getChannelMap() const;
+		std::map<std::string, Channel*> const	&getChannelMap() const;
 };
