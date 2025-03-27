@@ -37,14 +37,14 @@ void CommandPrivMsg::execute(const std::string &args, Client *client)
 			std::vector<Client *>::const_iterator it2 = clientsVec.begin();
 			for ( ; it2 != clientsVec.end(); ++it2)
 			{
-				if (argsVec[0] == (*it2)->getNickname())
+				if (argsVec[0] == (*it2)->get_nickname())
 				{
 					Reply::sendNumReply((*it2), RPL_AWAY, "PRIVMSG", argsVec[0] + " " + msgArg);
 					break ;
 				}
 			}
 			if (it2 == clientsVec.end())
-				return (Reply::sendNumReply(client, ERR_NOSUCHNICK, client->getNickname()));
+				return (Reply::sendNumReply(client, ERR_NOSUCHNICK, client->get_nickname()));
 		}
 	}
 	return;

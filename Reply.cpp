@@ -9,7 +9,7 @@ void Reply::sendReply(Client *client, std::string msg)
 
 void Reply::sendBroadcast(std::set<int> fds, Client* sender, std::string msg)
 {
-	std::string msgFull = sender->getSource() + " " + msg + "\r\n";
+	std::string msgFull = sender->get_mask() + " " + msg + "\r\n";
 	for (std::set<int>::const_iterator it = fds.begin(); it != fds.end(); ++it)
 	{
 		std::cout << INVERSE_BG << RED << ">>> " << BOLD << "server->FD<" << *it << "> " << msgFull << RESET ;
@@ -31,7 +31,6 @@ void  Reply::initReplies()
 	replies.insert(std::make_pair(ERR_NONICKNAMEGIVEN, "No nickname given"));
 	replies.insert(std::make_pair(ERR_ERRONEUSNICKNAME, "Erroneus nickname"));
 	replies.insert(std::make_pair(ERR_NICKNAMEINUSE, "Nickname is already in use"));
-	replies.insert(std::make_pair(ERR_NICKCOLLISION, "Nickname collision KILL"));
 
 	//////////// JOIN replies & errors:
 	replies.insert(std::make_pair(RPL_ENDOFNAMES, "End of /NAMES list"));
@@ -83,7 +82,7 @@ void Reply::sendNumReply(Client *client, int numericCode) // sendError
 		return;
 
 	std::ostringstream msg;
-	msg << ":" << Server::getInstance().getServerName() << " " << numericCode << " " << client->getNickname();
+	msg << ":" << Server::getInstance().getServerName() << " " << numericCode << " " << client->get_nickname();
 	msg << getErrorMessage(numericCode) << "\r\n";
 
 	std::cout << INVERSE_BG << RED << ">>> " << BOLD << msg.str() << RESET << std::endl;
@@ -96,7 +95,7 @@ void Reply::sendNumReply(Client *client, int numericCode, const std::string &str
 		return;
 
 	std::ostringstream msg;
-	msg << ":" << Server::getInstance().getServerName() << " " << numericCode << " " << client->getNickname();
+	msg << ":" << Server::getInstance().getServerName() << " " << numericCode << " " << client->get_nickname();
 	if (!str1.empty())
 		msg << " " << str1;
 	msg << getErrorMessage(numericCode) << "\r\n";
@@ -111,7 +110,7 @@ void Reply::sendNumReply(Client *client, int numericCode, const std::string &str
 		return;
 
 	std::ostringstream msg;
-	msg << ":" << Server::getInstance().getServerName() << " " << numericCode << " " << client->getNickname();
+	msg << ":" << Server::getInstance().getServerName() << " " << numericCode << " " << client->get_nickname();
 	if (!str1.empty())
 		msg << " " << str1;
 	if (!str2.empty())

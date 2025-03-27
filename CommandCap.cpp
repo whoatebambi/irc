@@ -12,11 +12,11 @@ void CommandCap::execute(const std::string &args, Client *client)
 
 void CommandCap::sendWelcome(Client *client)
 {
-	if (client->getNickname().empty() || client->getUsername().empty())
+	if (client->get_nickname().empty() || client->getUsername().empty())
 		return;
 
 	std::string	serverName = Server::getInstance().getServerName();
-	std::string	nickname = client->getNickname();
+	std::string	nickname = client->get_nickname();
 	const std::string &version = "1.0.0";
 	const std::string &userModes = "aiwroOs"; // dummy set of user modes
 	const std::string &channelModes = "mtov"; // dummy set of channel modes

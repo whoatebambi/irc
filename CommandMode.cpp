@@ -28,7 +28,7 @@ void CommandMode::execute(const std::string &args, Client *client)
 	}
 	else // handle user modes
 	{
-		if (target != client->getNickname())
+		if (target != client->get_nickname())
 			return (Reply::sendNumReply(client, ERR_NOSUCHNICK, target));
 		if (argVector.size() == 1 || (argVector.size() == 2 && argVector[1] == "+i"))
 			return (Reply::sendNumReply(client, RPL_UMODEIS, "+i"));

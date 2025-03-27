@@ -12,3 +12,5 @@ class CommandNick : public Command
 	public:
 		void execute(const std::string &args, Client *client);
 };
+
+bool	isValidNick(const std::string &nick);
