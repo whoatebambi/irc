@@ -3,42 +3,40 @@
 void CommandMode::execute(const std::string &args, Client *client)
 {
 	// std::cout << INVERSE_BG << BLUE << "MODE args: " BOLD << args << RESET << std::endl;
-
 	if (args.empty())
 		return (Reply::sendNumReply(client, ERR_NEEDMOREPARAMS, "MODE"));
 
-	std::vector<std::string> arg = splitArgs(args);
-	std::string target = arg[0];
-	if (target == client->getNickname())
+	std::vector<std::string> argVector = splitArgs(args);
+	const std::string &target = argVector[0];
+
+	if (target[0] == '#') // handle channel modes
 	{
-		if (arg.size() == 1 || (arg.size() == 2 && arg[1] == "+i"))
-			return (Reply::sendNumReply(client, RPL_UMODEIS, "+i"));
-		return (Reply::sendNumReply(client, ERR_USERSDONTMATCH, "Can't change mode for self.")); // custom because we don't handle user mode
+		Channel *channel = Channel::findChannel(target);
+
+		if (!channel)
+			return (Reply::sendNumReply(client, ERR_NOSUCHCHANNEL, target));
+		if (!channel->isInChannel(client))
+			return (Reply::sendNumReply(client, ERR_NOTONCHANNEL, target));
+		if (argVector.size() == 2 && (argVector[1] == "b" || argVector[1] == "+b")) // special request from IRSSI on JOIN
+			return (Reply::sendNumReply(client, RPL_ENDOFBANLIST, target));
+		if (argVector.size() == 1)
+			return (sendModes(channel, client));
+
+		if(!channel->isOperator(client))
+			return (Reply::sendNumReply(client, ERR_CHANOPRIVSNEEDED, target));
+		applyModes(channel, client, argVector);
 	}
-
-	refactorTarget(target); // or remove # ?
-	Channel *channel = Channel::findChannel(target);
-	if (!channel)
-		return (Reply::sendNumReply(client, ERR_NOSUCHNICK, target));
-	if (!channel->isUserInChannel(client))
-		return (Reply::sendNumReply(client, ERR_NOTONCHANNEL, target));
-	
-	if (arg.size() == 1)
-		return (sendChannelMode(channel, client));
-
-	if(!channel->isOperator(client))
-		return (Reply::sendNumReply(client, ERR_CHANOPRIVSNEEDED, target));
-
-	applyModes(channel, client, arg);
+	else // handle user modes
+	{
+		if (target != client->getNickname())
+			return (Reply::sendNumReply(client, ERR_NOSUCHNICK, target));
+		if (argVector.size() == 1 || (argVector.size() == 2 && argVector[1] == "+i"))
+			return (Reply::sendNumReply(client, RPL_UMODEIS, "+i"));
+		return (Reply::sendNumReply(client, ERR_USERSDONTMATCH, "Can't change mode for self.")); // custom: we don't handle user mode
+	}	
 }
 
-void CommandMode::refactorTarget(std::string &target)
-{
-	if (!target.empty() && target[0] != '#')
-		target = "#" + target;
-}
-
-void CommandMode::sendChannelMode(Channel *chan, Client *client)
+void CommandMode::sendModes(Channel *chan, Client *client)
 {
 	std::string modes = "+";
 	std::string params;
@@ -62,124 +60,109 @@ void CommandMode::sendChannelMode(Channel *chan, Client *client)
 
 void CommandMode::applyModes(Channel* channel, Client *client, const std::vector<std::string>& args)
 {
-	std::string modeStr = args[1];
-	bool adding = true;
-	size_t j = 2;
-	std::string modes;
-	std::string params;
-	for (size_t i = 0; i < modeStr.length(); ++i)
+    CommandContext ctx(client, channel, args);
+
+	for (size_t i = 0; i < ctx.modeStr.length(); ++i)
 	{
-		char c = modeStr[i];
-		if (c == '+') adding = true;
-		else if (c == '-') adding = false;
-		else if (c == 'i') handleMode_i(channel, adding, modes);
-		else if (c == 't') handleMode_t(channel, adding, modes);
-		else if (c == 'k') handleMode_k(channel, client, args, adding, j, modes, params);
-		else if (c == 'l') handleMode_l(channel, args, adding, j, modes, params);
-		else if (c == 'o') handleMode_o(channel, client, args, adding, j, modes, params);
+		char c = ctx.modeStr[i];
+		if (c == '+') ctx.adding = true;
+		else if (c == '-') ctx.adding = false;
+		else if (c == 'i') handleMode_i(ctx);
+		else if (c == 't') handleMode_t(ctx);
+		else if (c == 'k') handleMode_k(ctx);
+		else if (c == 'l') handleMode_l(ctx);
+		else if (c == 'o') handleMode_o(ctx);
 		else
-		{
-			std::string unknown(1, c);
-			Reply::sendNumReply(client, ERR_UNKNOWNMODE, unknown);
-		}
+			Reply::sendNumReply(client, ERR_UNKNOWNMODE, std::string(1, c));
 	}
-	if (!modes.empty())
-		Reply::sendBroadcast(channel->get_clientsSet(), client, "MODE " + channel->getName() + " " + modes + params);
+	if (!ctx.modes.empty())
+		Reply::sendBroadcast(channel->get_membersFd(), client, "MODE " + channel->getName() + " " + ctx.modes + ctx.params);
 }
 
-void CommandMode::handleMode_i(Channel* channel, bool adding, std::string& modes)
+void CommandMode::handleMode_i(CommandContext &ctx)
 {
-	channel->setInviteOnly(adding);
-	if (adding)
-		modes += "+i";
+	ctx.channel->setInviteOnly(ctx.adding);
+	if (ctx.adding)
+		ctx.modes += "+i";
 	else
-		modes += "-i";
+		ctx.modes += "-i";
 }
 
-void CommandMode::handleMode_t(Channel* channel, bool adding, std::string& modes)
+void CommandMode::handleMode_t(CommandContext &ctx)
 {
-	channel->setTopicLocked(adding);
-	if (adding)
-		modes += "+t";
+	ctx.channel->setTopicLocked(ctx.adding);
+	if (ctx.adding)
+		ctx.modes += "+t";
 	else
-		modes += "-t";
+		ctx.modes += "-t";
 }
 
-void CommandMode::handleMode_k(Channel* channel, Client* client, const std::vector<std::string>& args, bool adding, size_t& j, std::string& modes, std::string& params)
+void CommandMode::handleMode_k(CommandContext &ctx)
 {
-	if (adding)
+	if (ctx.adding)
 	{
-		if (j >= args.size())
+		if (ctx.index >= ctx.args.size())
 			return;
 
-		if (!channel->getKey().empty()) {
-			Reply::sendNumReply(client, ERR_KEYSET, channel->getName());
-			return;
-		}
-		channel->setKey(args[j]);
-		modes += "+k";
-		params += " " + args[j++];
+		if (!ctx.channel->getKey().empty())
+			return (Reply::sendNumReply(ctx.client, ERR_KEYSET, ctx.channel->getName()));	
+
+		ctx.channel->setKey(ctx.args[ctx.index]);
+		ctx.modes += "+k";
+		ctx.params += " " + ctx.args[ctx.index++];
 	}
 	else
 	{
-		channel->setKey("");
-		modes += "-k";
+		ctx.channel->setKey("");
+		ctx.modes += "-k";
 	}
 }
 
-void CommandMode::handleMode_l(Channel* channel, const std::vector<std::string>& args, bool adding, size_t& j, std::string& modes, std::string& params)
+void CommandMode::handleMode_l(CommandContext &ctx)
 {
-	if (adding)
+	if (ctx.adding)
 	{
-		if (j >= args.size())
+		if (ctx.index >= ctx.args.size())
 			return;
 
-		std::stringstream ss(args[j]);
-		size_t limit;
-		ss >> limit;
-		channel->setUserLimit(limit);
-		modes += "+l";
-		params += " " + args[j++];
+		const std::string& arg = ctx.args[ctx.index];
+		if (arg.empty() || arg.find_first_not_of("0123456789") != std::string::npos)
+			return (Reply::sendNumReply(ctx.client, ERR_UNKNOWNMODE, "l"));
+
+		int limit = strtol(arg.c_str(), NULL, 10);
+		if (limit <= 0)
+			return (Reply::sendNumReply(ctx.client, ERR_UNKNOWNMODE, "l"));
+		
+		ctx.channel->setUserLimit(limit);
+		ctx.modes += "+l";
+		ctx.params += " " + ctx.args[ctx.index++];
 	}
 	else
 	{
-		channel->setUserLimit(0);
-		modes += "-l";
+		ctx.channel->setUserLimit(0);
+		ctx.modes += "-l";
 	}
 }
 
-void CommandMode::handleMode_o(Channel* channel, Client* client, const std::vector<std::string>& args, bool adding, size_t& j, std::string& modes, std::string& params)
+void CommandMode::handleMode_o(CommandContext &ctx)
 {
-	if (j >= args.size())
+	if (ctx.index >= ctx.args.size())
 		return;
 
-	std::string nick = args[j++];
+	std::string nick = ctx.args[ctx.index++];
 	Client* targetUser = Server::getInstance().findClient(nick);
-	if (!targetUser || !channel->isUserInChannel(targetUser))
+	if (!targetUser || !ctx.channel->isInChannel(targetUser))
+		return (Reply::sendNumReply(ctx.client, ERR_NOSUCHNICK, nick));
+
+	if (ctx.adding)
 	{
-		Reply::sendNumReply(client, ERR_NOSUCHNICK, nick);
-		return;
+		ctx.channel->addOperator(targetUser);
+		ctx.modes += "+o";
 	}
-	if (adding)
-		channel->addOperator(targetUser);
 	else
-		channel->removeOperator(targetUser);
-	if (adding)
-		modes += "+o";
-	else
-		modes += "-o";
-	params += " " + nick;
+	{
+		ctx.channel->removeOperator(targetUser);
+		ctx.modes += "-o";
+	}
+	ctx.params += " " + nick;
 }
-
-std::vector<std::string> CommandMode::splitArgs(const std::string &input)
-{
-	std::vector<std::string> vec;
-	std::istringstream iss(input);
-	std::string word;
-
-	while(iss >> word)
-		vec.push_back(word);
-	return vec;
-}
-
-// Automatic op assignment when the last op leaves or disconnects (to prevent a “dead” channel).

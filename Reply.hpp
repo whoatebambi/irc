@@ -30,14 +30,14 @@
 #define ERR_ALREADYREGISTRED	462 // ✅ :You may not reregister"
 
 //////////// JOIN replies & errors:
-#define RPL_NAMREPLY			353 // "<channel> :[[@|+]<nick> [[@|+]<nick> [...]]]"
 #define RPL_TOPIC				332 // "<channel> :<topic>"
-#define ERR_TOOMANYCHANNELS		405 // "<channel name> :You have joined too many channels"
+#define RPL_NAMREPLY			353 // ✅ "<channel> :[[@|+]<nick> [[@|+]<nick> [...]]]"
+#define RPL_ENDOFNAMES			366 // ✅ "<channel> :End of /NAMES list"
+#define RPL_ENDOFBANLIST		368 // ✅ End of channel ban list
 #define ERR_NEEDMOREPARAMS		461	// ✅ "<command> :Not enough parameters"
-#define ERR_CHANNELISFULL		471 // "<channel> :Cannot join channel (+l)"
-#define ERR_INVITEONLYCHAN		473	// "<channel> :Cannot join channel (+i)"
-#define ERR_BANNEDFROMCHAN		474 // "<channel> :Cannot join channel (+b)"                       
-#define ERR_BADCHANNELKEY		475	// "<channel> :Cannot join channel (+k)"                        
+#define ERR_CHANNELISFULL		471 // ✅ "<channel> :Cannot join channel (+l)"
+#define ERR_INVITEONLYCHAN		473	// ✅ "<channel> :Cannot join channel (+i)"                     
+#define ERR_BADCHANNELKEY		475	// ✅ "<channel> :Cannot join channel (+k)"                        
 #define ERR_BADCHANMASK			476 // ✅ "<channel> :Bad channel mask"
 
 //////////// PART replies & errors:
@@ -46,7 +46,7 @@
 #define ERR_NEEDMOREPARAMS		461	// "<command> :Not enough parameters"
 
 //////////// TOPIC replies & errors:
-// CHANNEL OPERATORS ONLY: Eject a client from the channel
+// CHANNEL OPERATORS ONLY:
 #define RPL_NOTOPIC				331 // "<channel> :No topic is set"
 #define RPL_TOPIC				332 // "<channel> :<topic>"
 #define ERR_NOTONCHANNEL		442 // "<channel> :You're not on that channel"

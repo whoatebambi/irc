@@ -9,12 +9,12 @@ void Reply::sendReply(Client *client, std::string msg)
 
 void Reply::sendBroadcast(std::set<int> fds, Client* sender, std::string msg)
 {
-	std::string msgFull = ":" + sender->getSource() + " " + msg + "\r\n";
-    for (std::set<int>::const_iterator it = fds.begin(); it != fds.end(); ++it)
-    {
-        std::cout << INVERSE_BG << RED << ">>> " << BOLD << "SERVER to FD<" << *it << ">" << RESET << msgFull;
-        send(*it, msgFull.c_str(), msgFull.size(), MSG_NOSIGNAL);
-    }
+	std::string msgFull = sender->getSource() + " " + msg + "\r\n";
+	for (std::set<int>::const_iterator it = fds.begin(); it != fds.end(); ++it)
+	{
+		std::cout << INVERSE_BG << RED << ">>> " << BOLD << "server->FD<" << *it << "> " << msgFull << RESET ;
+		send(*it, msgFull.c_str(), msgFull.size(), MSG_NOSIGNAL);
+	}
 }
 
 
@@ -34,12 +34,13 @@ void  Reply::initReplies()
 	replies.insert(std::make_pair(ERR_NICKCOLLISION, "Nickname collision KILL"));
 
 	//////////// JOIN replies & errors:
-	replies.insert(std::make_pair(ERR_TOOMANYCHANNELS, "You have joined too many channels"));
+	replies.insert(std::make_pair(RPL_ENDOFNAMES, "End of /NAMES list"));
+	replies.insert(std::make_pair(RPL_ENDOFBANLIST, "End of channel ban list"));
 	replies.insert(std::make_pair(ERR_CHANNELISFULL, "Cannot join channel (+l)"));
 	replies.insert(std::make_pair(ERR_INVITEONLYCHAN, "Cannot join channel (+i)"));
-	replies.insert(std::make_pair(ERR_BANNEDFROMCHAN, "Cannot join channel (+b)"));
 	replies.insert(std::make_pair(ERR_BADCHANNELKEY, "Cannot join channel (+k)"));
 	replies.insert(std::make_pair(ERR_BADCHANMASK, "Bad Channel Mask"));
+
 	
 	//////////// MODE replies & errors:
 	replies.insert(std::make_pair(ERR_NOSUCHNICK, "No such nick/channel"));
