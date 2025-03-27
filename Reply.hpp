@@ -47,11 +47,11 @@
 
 //////////// TOPIC replies & errors:
 // CHANNEL OPERATORS ONLY:
-#define RPL_NOTOPIC				331 // "<channel> :No topic is set"
-#define RPL_TOPIC				332 // "<channel> :<topic>"
-#define ERR_NOTONCHANNEL		442 // "<channel> :You're not on that channel"
-#define ERR_NEEDMOREPARAMS		461	// "<command> :Not enough parameters"
-#define ERR_CHANOPRIVSNEEDED	482 // "<channel> :You're not channel operator"
+#define RPL_NOTOPIC				331 // ✅ "<channel> :No topic is set"
+#define RPL_TOPIC				332 // ✅ "<channel> :<topic>"
+#define ERR_NOTONCHANNEL		442 // ✅ "<channel> :You're not on that channel"
+#define ERR_NEEDMOREPARAMS		461	// ✅ "<command> :Not enough parameters"
+#define ERR_CHANOPRIVSNEEDED	482 // ✅ "<channel> :You're not channel operator"
 
 //////////// INVITE replies & errors:
 // CHANNEL OPERATORS ONLY: Invite a client to an invite-only channel (mode +i)
