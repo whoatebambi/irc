@@ -28,6 +28,7 @@ class Channel
         Channel(Client *client, std::string name, std::string key);
         ~Channel();
 		void	joinChannel(Client *client, std::string key);
+		void	partChannel(Client *client, const std::string &msgPart);
 		bool	canJoin(Client *client, std::string key);
         static void    removeFromList(std::set<int> &list, int fd);
 

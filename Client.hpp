@@ -11,6 +11,7 @@
 #include "CommandPing.hpp"
 #include "CommandPrivMsg.hpp"
 #include "CommandTopic.hpp"
+#include "CommandPart.hpp"
 #include "Channel.hpp"
 
 #include <cstdarg>
@@ -32,6 +33,7 @@ class CommandJoin;
 class CommandPass;
 class CommandPing;
 class CommandTopic;
+class CommandPart;
 
 class Client
 {

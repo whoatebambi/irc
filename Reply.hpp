@@ -40,9 +40,9 @@
 #define ERR_BADCHANMASK			476 // ✅ "<channel> :Bad channel mask"
 
 //////////// PART replies & errors:
-#define ERR_NOSUCHCHANNEL		403	// "<channel name> :No such channel"
-#define ERR_NOTONCHANNEL		442 // "<channel> :You're not on that channel"
-#define ERR_NEEDMOREPARAMS		461	// "<command> :Not enough parameters"
+#define ERR_NOSUCHCHANNEL		403	// ✅ "<channel name> :No such channel"
+#define ERR_NOTONCHANNEL		442 // ✅ "<channel> :You're not on that channel"
+#define ERR_NEEDMOREPARAMS		461	// ✅ "<command> :Not enough parameters"
 
 //////////// TOPIC replies & errors:
 // CHANNEL OPERATORS ONLY:

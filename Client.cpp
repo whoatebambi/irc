@@ -19,6 +19,7 @@ Client::Client(int fd, std::string ip, int port)
 	this->_CommandMap["PING"] = new CommandPing();
 	this->_CommandMap["PRIVMSG"] = new CommandPrivMsg();
 	this->_CommandMap["TOPIC"] = new CommandTopic();
+	this->_CommandMap["PART"] = new CommandPart();
 }
 
 Client::~Client()

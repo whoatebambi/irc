@@ -6,7 +6,7 @@ void CommandNick::execute(const std::string &args, Client *client)
 	if (args.empty())
 		return (Reply::sendNumReply(client, ERR_NONICKNAMEGIVEN));
 
-		if (!isValidNick(args))
+	if (!isValidNick(args))
 		return (Reply::sendNumReply(client, ERR_ERRONEUSNICKNAME, args));
 
 	if (Server::getInstance().isClient(args)) // && client->get_nickname() != args
