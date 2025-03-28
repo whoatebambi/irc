@@ -40,9 +40,9 @@ bool Channel::canJoin(Client *client, std::string key)
 
 void Channel::joinChannel(Client *client, std::string key)
 {
-    if (!canJoin(client, key))
-        return ;
-    this->_members.insert(client);
+	if (!canJoin(client, key))
+		return ;
+	this->_members.insert(client);
 
 	Reply::sendBroadcast(get_membersFd(), client, " JOIN :" + getName());
 	
@@ -51,6 +51,17 @@ void Channel::joinChannel(Client *client, std::string key)
 	Reply::sendNumReply(client, RPL_NAMREPLY, "= " + getName() + getMembersNick());
 	Reply::sendNumReply(client, RPL_ENDOFNAMES, getName());
 }
+
+void Channel::partChannel(Client *client, const std::string &msgPart)
+{
+	if (msgPart == "")
+		Reply::sendBroadcast(get_membersFd(), client, " PART " + _name);
+	else
+		Reply::sendBroadcast(get_membersFd(), client, " PART " + _name + " :" + msgPart);
+	this->_members.erase(client);
+	this->_operators.erase(client);
+}
+
 
 std::string	Channel::get_topic() const { return _topic; }
 void	Channel::set_topic(const std::string &topic) { _topic = topic; }
