@@ -13,11 +13,11 @@ int	main(int argc, char **argv)
 	try {
 		std::signal(SIGINT, handleSignal);
 		if (argc > 1)
-			Server::getInstance().Init(argv);
+			Server::getInstance().init(argv);
 		else
-			Server::getInstance().Init();
-		while(Server::getInstance().isLive())
-			Server::getInstance().Monitor();
+			Server::getInstance().init();
+		while(Server::getInstance().is_live())
+			Server::getInstance().monitor();
 	}
 	catch(const std::exception &e) {
 		std::cerr << e.what() << std::endl;

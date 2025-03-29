@@ -55,7 +55,7 @@ void	Channel::removeMember(Client *client) { _memberSet.erase(client); }
 Channel*	Channel::findChannel(std::string target)
 {
 	
-	std::set<Channel*> _channelSet = Server::getInstance().getChannelSet();
+	std::set<Channel*> _channelSet = Server::getInstance().get_channelSet();
 	for (std::set<Channel*>::iterator it = _channelSet.begin(); it != _channelSet.end(); ++it)
 	{
 		if ((*it)->get_name() == target)

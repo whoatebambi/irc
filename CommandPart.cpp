@@ -16,7 +16,7 @@ void CommandPart::execute(const std::string &args, Client *client)
 	if (!isValidPartMsg(partMsg))
 		partMsg = ""; // drop silently
 
-	const std::set<Channel*> &channelSet = Server::getInstance().getChannelSet();
+	const std::set<Channel*> &channelSet = Server::getInstance().get_channelSet();
 	for (std::vector<std::string>::const_iterator it = channelVec.begin(); it != channelVec.end(); ++it)
 	{
 		const std::string &channelName = *it;

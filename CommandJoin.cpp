@@ -10,7 +10,7 @@ void CommandJoin::execute(const std::string &args, Client *client)
 	if (argMap.empty())
 		return;
 
-	const std::set<Channel*> &channelSet = Server::getInstance().getChannelSet();
+	const std::set<Channel*> &channelSet = Server::getInstance().get_channelSet();
 	for (std::map<std::string, std::string>::const_iterator it = argMap.begin(); it != argMap.end(); ++it)
 	{
 		const std::string &channelName = it->first;
@@ -28,7 +28,7 @@ void CommandJoin::execute(const std::string &args, Client *client)
             }
         }
         if (it2 == channelSet.end())      
-			Server::getInstance().newChannel(client, it->first, it->second);
+			Server::getInstance().addChannel(client, it->first, it->second);
     }
 	// •	Add the user to the channel’s member list.
 	// •	Update the channel’s user count.

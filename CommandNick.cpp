@@ -16,7 +16,7 @@ void CommandNick::execute(const std::string &args, Client *client)
 	client->set_nickname(args);
 	client->set_mask();
 
-	const std::set<Channel*> &channelSet = Server::getInstance().getChannelSet();
+	const std::set<Channel*> &channelSet = Server::getInstance().get_channelSet();
 	std::set<int> broadcastFds;
 	for (std::set<Channel*>::const_iterator it = channelSet.begin(); it != channelSet.end(); ++it)
 	{

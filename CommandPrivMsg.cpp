@@ -27,7 +27,7 @@ void CommandPrivMsg::execute(const std::string &args, Client *client)
 
 void	handleChannelMsg(const std::string &target, const std::string &msgArg, Client *client)
 {
-	const std::set<Channel*> &channelSet = Server::getInstance().getChannelSet();
+	const std::set<Channel*> &channelSet = Server::getInstance().get_channelSet();
 	Channel *channel = NULL;
 
 	for (std::set<Channel*>::const_iterator it = channelSet.begin(); it != channelSet.end(); ++it)
@@ -53,7 +53,7 @@ void	handleChannelMsg(const std::string &target, const std::string &msgArg, Clie
 
 void	handlePrivateMsg(const std::string &target, const std::string &msgArg, Client *client)
 {
-	const std::vector<Client*> &clients = Server::getInstance().getClients();
+	const std::vector<Client*> &clients = Server::getInstance().get_clientVec();
 	Client *receiver = NULL;
 
 	for (std::vector<Client*>::const_iterator it = clients.begin(); it != clients.end(); ++it)

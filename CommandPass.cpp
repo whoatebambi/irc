@@ -6,7 +6,7 @@ void CommandPass::execute(const std::string &args, Client *client)
 
 	if (args.empty())
 		return (Reply::sendNumReply(client, ERR_NEEDMOREPARAMS, "PASS"));
-	if (args == (Server::getInstance().getPass()))
+	if (args == (Server::getInstance().get_pass()))
 	{
 		if (!client->get_isAuth())
 			client->set_isAuth();
@@ -16,7 +16,7 @@ void CommandPass::execute(const std::string &args, Client *client)
 	//ajouter si client pas auth client.setauth(true) sinon err client already auth
 	else
 	{
-		Server::getInstance().RemoveClient(client->get_fd());
+		Server::getInstance().removeClient(client->get_fd());
 		std::cout << "Client <" << client->get_fd() << "> removed" << std::endl;
 	}
 }
