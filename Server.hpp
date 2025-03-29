@@ -39,7 +39,7 @@ class Server
 		struct sockaddr_in	cliadd;
 		int	epoll_fd;
 		static const int	MAX_EVENTS = 10;
-		std::map<std::string, Channel*> _channelMap;
+		std::map<std::string, Channel*> _channelMap; // maybe refactor to <set>
 
 	public:
 		Server();
@@ -63,8 +63,9 @@ class Server
 
 		void	newChannel(Client *client, std::string chanName, std::string key);
 
-		Client *findClient(std::string &nickname);
+		Client *get_client(std::string const &nickname);
 		bool	isClient(std::string const &nickname);
+		bool	isRegisteredClient(std::string const &nickname);
 		std::vector<Client*>	getClientsTable() const ;
 		std::string	getServerName() const;
 		std::map<std::string, Channel*> const	&getChannelMap() const;

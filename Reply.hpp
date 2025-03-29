@@ -54,13 +54,12 @@
 
 //////////// INVITE replies & errors:
 // CHANNEL OPERATORS ONLY: Invite a client to an invite-only channel (mode +i)
-#define RPL_AWAY				301 // "<nick> :<away message>"
-#define RPL_INVITING			341 // "<channel> <nick>"
-#define ERR_NOSUCHNICK			401 // "<nickname> :No such nick/channel"
-#define ERR_NOTONCHANNEL		442 // "<channel> :You're not on that channel"
-#define ERR_USERONCHANNEL		443 // "<user> <channel> :is already on channel"
-#define ERR_NEEDMOREPARAMS		461	// "<command> :Not enough parameters"
-#define ERR_CHANOPRIVSNEEDED	482 // "<channel> :You're not channel operator"
+#define RPL_INVITING			341 // ✅ "<channel> <nick>"
+#define ERR_NOSUCHNICK			401 // ✅ "<nickname> :No such nick/channel"
+#define ERR_NOTONCHANNEL		442 // ✅ "<channel> :You're not on that channel"
+#define ERR_USERONCHANNEL		443 // ✅ "<user> <channel> :is already on channel"
+#define ERR_NEEDMOREPARAMS		461	// ✅ "<command> :Not enough parameters"
+#define ERR_CHANOPRIVSNEEDED	482 // ✅ "<channel> :You're not channel operator"
 
 //////////// KICK replies & errors:
 // CHANNEL OPERATORS ONLY: Eject a client from the channel

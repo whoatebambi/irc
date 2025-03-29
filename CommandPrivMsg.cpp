@@ -17,11 +17,11 @@ void CommandPrivMsg::execute(const std::string &args, Client *client)
 			{
 				if (sameString(argsVec[0], it->first))
 				{
-					if (client->isInList(it->second->getMembers()))
+					if (client->isInList(it->second->get_memberSet())) // to check, why would it need channel info?
 					{
-						std::set<int> tmplist = it->second->get_membersFd();
-						Channel::removeFromList(tmplist, client->getFd());
-						Reply::sendBroadcast(tmplist, client, "PRIVMSG " + argsVec[0] + " :" + msgArg);  // check ":"
+						std::set<int> fdSet = it->second->getMembersFdSet();
+						fdSet.erase(client->get_fd());
+						Reply::sendBroadcast(fdSet, client, "PRIVMSG " + argsVec[0] + " :" + msgArg);  // check ":"
 						break ;
 					}
 					else

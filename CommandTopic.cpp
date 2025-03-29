@@ -27,7 +27,7 @@ void CommandTopic::execute(const std::string &args, Client *client)
 		return (Reply::sendNumReply(client, RPL_TOPIC, target, channel->get_topic()));
 	}
 
-	if(!channel->isOperator(client) && channel->isTopicLocked())
+	if(!channel->isOperator(client) && channel->get_topicLocked())
 		return (Reply::sendNumReply(client, ERR_CHANOPRIVSNEEDED, target));
 	
 	if (!isValidChannelTopic(argVector[1]))
@@ -37,12 +37,12 @@ void CommandTopic::execute(const std::string &args, Client *client)
 	if (argVector[1] == ":")
 	{
 		channel->set_topic("");
-		Reply::sendBroadcast(channel->get_membersFd(), client, "TOPIC " + channel->getName() + " :");
+		Reply::sendBroadcast(channel->getMembersFdSet(), client, "TOPIC " + channel->get_name() + " :");
 		return;
 	}
 	//set	
 	channel->set_topic(argVector[1]);
-	Reply::sendBroadcast(channel->get_membersFd(), client, "TOPIC " + channel->getName() + " :" + argVector[1]);
+	Reply::sendBroadcast(channel->getMembersFdSet(), client, "TOPIC " + channel->get_name() + " :" + argVector[1]);
 }
 
 bool isValidChannelTopic(const std::string &topic)

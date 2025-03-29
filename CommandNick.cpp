@@ -14,6 +14,7 @@ void CommandNick::execute(const std::string &args, Client *client)
 
 	std::string oldMask = client->get_mask();
 	client->set_nickname(args);
+	client->set_mask();
 
 	std::map<std::string, Channel*> const &channelMap = Server::getInstance().getChannelMap();
 	std::set<int> broadcastFds;
@@ -22,14 +23,14 @@ void CommandNick::execute(const std::string &args, Client *client)
 		Channel *channel = it->second;
 		if (channel->isInChannel(client))
 		{
-			const std::set<int> &fds = channel->get_membersFd();
+			const std::set<int> &fds = channel->getMembersFdSet();
 			broadcastFds.insert(fds.begin(), fds.end()); // merge into set (no duplicates)
 		}
 	}
 	std::string msg = oldMask + " " + "NICK :" + client->get_nickname() + "\r\n";
 	if (broadcastFds.empty())
 	{
-		send(client->getFd(), msg.c_str(), msg.size(), MSG_NOSIGNAL);
+		send(client->get_fd(), msg.c_str(), msg.size(), MSG_NOSIGNAL);
 		return;
 	}
 	// Reply::sendBroadcast(broadcastFds, client, msg);

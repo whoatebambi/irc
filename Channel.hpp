@@ -12,58 +12,64 @@ class Client;
 
 class Channel
 {
-    private:
-        std::string	_name;
-        std::string	_key;
-        std::string	_founderMask;
-        std::set<Client*> _members;
+	private:
+		std::string	_name;
+		std::string	_key;
+		std::string	_founderMask;
+		size_t _userLimit;
 		bool _inviteOnly;
 		bool _topicLocked;
 		std::string _topic;
-		size_t _userLimit;
-		std::set<Client*> _operators;
-		std::set<Client*> _inviteList;
+		std::set<Client*> _memberSet;
+		std::set<Client*> _operatorSet;
+		std::set<Client*> _invitedSet;
 
-    public:
-        Channel(Client *client, std::string name, std::string key);
-        ~Channel();
-		void	joinChannel(Client *client, std::string key);
-		void	partChannel(Client *client, const std::string &msgPart);
+	public:
+		Channel(Client *client, std::string name, std::string key);
+		~Channel();
+
+		// Join command
+		void	joinChannel(Client *client, const std::string &key);
 		bool	canJoin(Client *client, std::string key);
-        static void    removeFromList(std::set<int> &list, int fd);
+	
+		// Part command
+		void	partChannel(Client *client, const std::string &msgPart);
 
+		// Channel search
 		static Channel*	findChannel(std::string target);
-
-		std::string	get_topic() const;
-		void set_topic(const std::string &topic);
-
 		std::string	getMembersNick() const;
-    	size_t	get_membersCount() const;
+		std::string	get_name() const;
+				
+		// Client search
+		bool	isInChannel(Client* client) const;
+		std::set<int>	getMembersFdSet() const;
+		std::set<Client*> const	&get_memberSet() const;
 
-		std::string	getFounderMask() const;
+		// Channel key
+		std::string	get_key() const;
+		void		set_key(const std::string &key);
 
-    	std::set<Client*> const	&getMembers() const;
-		std::set<int>	get_membersFd() const;
-		
-		std::string	getName() const;
+		// Founder info
+		void	set_founderMask(std::string clientMask);
 
-		void setInviteOnly(bool mode);
-		bool isInviteOnly() const;
+		// User limit
+		void	set_userLimit(size_t limit);
+		size_t	get_userLimit() const;
 
-		void setTopicLocked(bool mode);
-		bool isTopicLocked() const;
+		// Invite mode
+		void	set_inviteOnly(bool mode);
+		bool	get_inviteOnly() const;
+		void	addInvite(Client *client);
+		bool	isInvited(Client *client) const;
 
-		void setKey(const std::string& key);
-		std::string getKey() const;
+		// Topic lock mode
+		void		setTopicLocked(bool mode);
+		bool		get_topicLocked() const;
+		void		set_topic(const std::string &topic);
+		std::string	get_topic() const;
 
-		void setUserLimit(size_t limit);
-		size_t getUserLimit() const;
-		void set_userCount(size_t limit);
-		size_t get_userCount() const;
-
-		void addOperator(Client* client);
-		void removeOperator(Client* client);
+		// Operator management
+		void	addOperator(Client* client);
+		void	removeOperator(Client* client);
 		bool	isOperator(Client* client) const;
-
-		bool isInChannel(Client* client) const;
 };

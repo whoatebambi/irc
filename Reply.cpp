@@ -4,7 +4,7 @@ void Reply::sendReply(Client *client, std::string msg)
 {
 	std::cout << INVERSE_BG << RED << ">>> " << BOLD << msg << RESET << std::endl;
 	msg += "\r\n";
-	send(client->getFd(), msg.c_str(), msg.size(), MSG_NOSIGNAL);
+	send(client->get_fd(), msg.c_str(), msg.size(), MSG_NOSIGNAL);
 }
 
 void Reply::sendBroadcast(std::set<int> fds, Client* sender, std::string msg)
@@ -61,7 +61,6 @@ void  Reply::initReplies()
 	replies.insert(std::make_pair(RPL_TOPIC, " ")); // test it
 
 	//////////// INVITE replies & errors:
-	replies.insert(std::make_pair(RPL_AWAY, " ")); // test it
 	replies.insert(std::make_pair(ERR_USERONCHANNEL, "is already on channel"));
 
 }
@@ -86,7 +85,7 @@ void Reply::sendNumReply(Client *client, int numericCode) // sendError
 	msg << getErrorMessage(numericCode) << "\r\n";
 
 	std::cout << INVERSE_BG << RED << ">>> " << BOLD << msg.str() << RESET << std::endl;
-	send(client->getFd(), msg.str().c_str(), msg.str().size(), MSG_NOSIGNAL);
+	send(client->get_fd(), msg.str().c_str(), msg.str().size(), MSG_NOSIGNAL);
 }
 
 void Reply::sendNumReply(Client *client, int numericCode, const std::string &str1)
@@ -101,7 +100,7 @@ void Reply::sendNumReply(Client *client, int numericCode, const std::string &str
 	msg << getErrorMessage(numericCode) << "\r\n";
 
 	std::cout << INVERSE_BG << RED << ">>> " << BOLD << msg.str() << RESET << std::endl;
-	send(client->getFd(), msg.str().c_str(), msg.str().size(), MSG_NOSIGNAL);
+	send(client->get_fd(), msg.str().c_str(), msg.str().size(), MSG_NOSIGNAL);
 }
 
 void Reply::sendNumReply(Client *client, int numericCode, const std::string &str1, const std::string &str2)
@@ -118,5 +117,5 @@ void Reply::sendNumReply(Client *client, int numericCode, const std::string &str
 	msg << getErrorMessage(numericCode) << "\r\n";
 
 	std::cout << INVERSE_BG << RED << ">>> " << BOLD << msg.str() << RESET << std::endl;
-	send(client->getFd(), msg.str().c_str(), msg.str().size(), MSG_NOSIGNAL);
+	send(client->get_fd(), msg.str().c_str(), msg.str().size(), MSG_NOSIGNAL);
 }
