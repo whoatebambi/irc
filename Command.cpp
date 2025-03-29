@@ -1,6 +1,6 @@
 #include "Command.hpp"
 
-// need to check edge cases with ":"
+// need to check edge cases with ":", maybe need to improve to cover edge cases
 std::vector<std::string>	splitArgs(const std::string &input)
 {
 	std::vector<std::string> vec;

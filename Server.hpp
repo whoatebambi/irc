@@ -3,6 +3,20 @@
 #include "Client.hpp"
 #include "Reply.hpp"
 
+#include "Command.hpp"
+#include "CommandCap.hpp"
+#include "CommandNick.hpp"
+#include "CommandUser.hpp"
+#include "CommandMode.hpp"
+#include "CommandJoin.hpp"
+#include "CommandPass.hpp"
+#include "CommandPing.hpp"
+#include "CommandPrivMsg.hpp"
+#include "CommandTopic.hpp"
+#include "CommandPart.hpp"
+#include "CommandInvite.hpp"
+#include "CommandKick.hpp"
+
 #include <iostream>
 #include <cstring>
 #include <sys/socket.h>
@@ -15,6 +29,7 @@
 #include <csignal>
 #include <cstdlib>
 #include <map>
+#include <set>
 
 #define INVERSE "\033[7m"
 #define RED "\033[31m"
@@ -24,49 +39,68 @@
 #define INVERSE_BG "\033[7;49m"
 #define BOLD "\033[1m"
 
+class Command;
+class CommandCap;
+class CommandNick;
+class CommandUser;
+class CommandMode;
+class CommandJoin;
+class CommandPass;
+class CommandPing;
+class CommandTopic;
+class CommandPart;
+class CommandInvite;
+class CommandKick;
+
 class Client;
 class Channel;
 
 class Server
 {
 	private:
-		int	_port;
-		int	_fd;
+		int			_fd;
 		std::string	_serverName;
+		bool		_live; // need static?
+		int			_port;
 		std::string _pass;
-		bool	_isLive; // need static?
-		std::vector<Client*>	clientsTable;
-		struct sockaddr_in	cliadd;
-		int	epoll_fd;
-		static const int	MAX_EVENTS = 10;
-		std::map<std::string, Channel*> _channelMap; // maybe refactor to <set>
+		std::map<std::string, Command*>	_CommandMap;
+	
+		struct sockaddr_in	_cliadd;
+		int					_epollFd;
+		std::vector<Client*>	_clientVec;
+		std::set<Channel*>		_channelSet;
 
 	public:
 		Server();
 		~Server();
 
-		static	Server& getInstance();
-		std::vector<Client *> getClients() const;
-		std::string getPass() const;
-		void setPass(std::string newPass);
-		bool	isLive();
+		// Initialize the server
+		static	Server &getInstance();
+		void	init(); // still needed?
+		void	init(char **argv);
+		void	initCommandMap();
+
+		// Closing functions
 		void	shutdown();
-		void	Monitor();
-		void	CloseFds();
-		void	Init();
-		void	Init(char **argv);
-		void	AcceptNewClient();
-		void	RemoveClient(int fd);
-		void	handleClientData(const epoll_event &event);
-		void	handleEpollWaitError();
-		void	handleEpollError(const epoll_event &event);
+		void	closeFds();
 
-		void	newChannel(Client *client, std::string chanName, std::string key);
+		// Server getters/setters
+		const std::string	&get_serverName() const;
+		bool				is_live() const;
+		const std::string	&get_pass() const;
+		const std::map<std::string, Command*> &get_CommandMap() const;
 
-		Client *get_client(std::string const &nickname);
-		bool	isClient(std::string const &nickname);
-		bool	isRegisteredClient(std::string const &nickname);
-		std::vector<Client*>	getClientsTable() const ;
-		std::string	getServerName() const;
-		std::map<std::string, Channel*> const	&getChannelMap() const;
+		// Server data handling
+		void	monitor();
+		void	acceptNewClient();
+		void	handleDataClient(const epoll_event &event);
+		void	addChannel(Client *client, std::string name, std::string key);
+		void	removeClient(int fd);
+		
+		// Clients and channels setters/getters
+		bool	isClient(const std::string &nickname) const;
+		bool	isRegisteredClient(const std::string &nickname) const;
+		Client	*get_client(std::string const &nickname);
+		const std::vector<Client*>	&get_clientVec() const;
+		const std::set<Channel*>	&get_channelSet() const;
 };

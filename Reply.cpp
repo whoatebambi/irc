@@ -59,10 +59,13 @@ void  Reply::initReplies()
 	//////////// TOPIC replies & errors:
 	replies.insert(std::make_pair(RPL_NOTOPIC, "No topic is set"));
 	replies.insert(std::make_pair(RPL_TOPIC, " ")); // test it
+	replies.insert(std::make_pair(ERR_INVALIDTOPIC, "Topic is invalid"));
 
 	//////////// INVITE replies & errors:
 	replies.insert(std::make_pair(ERR_USERONCHANNEL, "is already on channel"));
 
+	//////////// KICK replies & errors:
+	replies.insert(std::make_pair(ERR_USERNOTINCHANNEL, "They aren't on that channel"));
 }
 
 // Get error message from map
@@ -81,7 +84,7 @@ void Reply::sendNumReply(Client *client, int numericCode) // sendError
 		return;
 
 	std::ostringstream msg;
-	msg << ":" << Server::getInstance().getServerName() << " " << numericCode << " " << client->get_nickname();
+	msg << ":" << Server::getInstance().get_serverName() << " " << numericCode << " " << client->get_nickname();
 	msg << getErrorMessage(numericCode) << "\r\n";
 
 	std::cout << INVERSE_BG << RED << ">>> " << BOLD << msg.str() << RESET << std::endl;
@@ -94,7 +97,7 @@ void Reply::sendNumReply(Client *client, int numericCode, const std::string &str
 		return;
 
 	std::ostringstream msg;
-	msg << ":" << Server::getInstance().getServerName() << " " << numericCode << " " << client->get_nickname();
+	msg << ":" << Server::getInstance().get_serverName() << " " << numericCode << " " << client->get_nickname();
 	if (!str1.empty())
 		msg << " " << str1;
 	msg << getErrorMessage(numericCode) << "\r\n";
@@ -109,7 +112,7 @@ void Reply::sendNumReply(Client *client, int numericCode, const std::string &str
 		return;
 
 	std::ostringstream msg;
-	msg << ":" << Server::getInstance().getServerName() << " " << numericCode << " " << client->get_nickname();
+	msg << ":" << Server::getInstance().get_serverName() << " " << numericCode << " " << client->get_nickname();
 	if (!str1.empty())
 		msg << " " << str1;
 	if (!str2.empty())

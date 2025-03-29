@@ -76,7 +76,7 @@ void CommandMode::applyModes(Channel* channel, Client *client, const std::vector
 			Reply::sendNumReply(client, ERR_UNKNOWNMODE, std::string(1, c));
 	}
 	if (!ctx.modes.empty())
-		Reply::sendBroadcast(channel->getMembersFdSet(), client, "MODE " + channel->get_name() + " " + ctx.modes + ctx.params);
+		Reply::sendBroadcast(channel->generateMembersFd(), client, "MODE " + channel->get_name() + " " + ctx.modes + ctx.params);
 }
 
 void CommandMode::handleMode_i(CommandContext &ctx)

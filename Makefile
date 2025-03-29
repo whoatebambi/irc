@@ -5,9 +5,9 @@ UNAME_S		:=	$(shell uname -s)
 CC			=	c++
 FLAG		=	-Wall -Wextra -Werror -std=c++98
 
-C_FILES		=	main.cpp Client.cpp Server.cpp Channel.cpp Command.cpp  \
+C_FILES		=	main.cpp Client.cpp Server.cpp Channel.cpp Command.cpp Reply.cpp \
 				CommandCap.cpp CommandNick.cpp CommandUser.cpp CommandMode.cpp CommandJoin.cpp CommandPass.cpp \
-				CommandPing.cpp CommandPrivMsg.cpp CommandTopic.cpp CommandPart.cpp CommandInvite.cpp Reply.cpp\
+				CommandPing.cpp CommandPrivMsg.cpp CommandTopic.cpp CommandPart.cpp CommandInvite.cpp CommandKick.cpp\
 
 OBJ_DIR		=	builds
 

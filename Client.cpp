@@ -9,29 +9,9 @@ Client::Client(int fd, std::string ip, int port)
 	this->_nickname = "";
 	this->_username = "";
 	this->_realname = "";
-
-	this->_CommandMap["CAP"] = new CommandCap();
-	this->_CommandMap["NICK"] = new CommandNick();
-	this->_CommandMap["USER"] = new CommandUser();
-	this->_CommandMap["MODE"] = new CommandMode();
-	this->_CommandMap["JOIN"] = new CommandJoin();
-	this->_CommandMap["PASS"] = new CommandPass();
-	this->_CommandMap["PING"] = new CommandPing();
-	this->_CommandMap["PRIVMSG"] = new CommandPrivMsg();
-	this->_CommandMap["TOPIC"] = new CommandTopic();
-	this->_CommandMap["PART"] = new CommandPart();
-	this->_CommandMap["INVITE"] = new CommandInvite();
 }
 
-Client::~Client()
-{
-	// std::cout << "Client <" << this->_fd << "> destructor called" << std::endl;
-
-	for (std::map<std::string, Command*>::iterator it = this->_CommandMap.begin(); it != this->_CommandMap.end(); ++it) {
-		delete it->second;
-	}
-	this->_CommandMap.clear();
-}
+Client::~Client() {}
 
 void	Client::parseDataClient()
 {
@@ -49,8 +29,8 @@ void	Client::parseDataClient()
 	line += buffer;
 	if (line.empty() || bytes == -1)
 	{
-		return Server::getInstance().RemoveClient(this->_fd); // swap fd for (Client *client)
-		// RemoveClient(fd);
+		return Server::getInstance().removeClient(this->_fd); // swap fd for (Client *client)
+		// removeClient(fd);
 		// RemoveFds(fd);
 		std::cout << "Client <" << this->_fd << "> Disconnected" << std::endl;
 		// close(fd);
@@ -84,8 +64,11 @@ void Client::executeCommand(std::string &line)
 	std::string cmd = line.substr(0, pos);
 	if (pos != std::string::npos) 
 		{args = ft_trim(line.substr(pos + 1));}
-	if (this->_CommandMap.find(cmd) != this->_CommandMap.end())
-		this->_CommandMap[cmd]->execute(args, this);
+
+	const std::map<std::string, Command*> &_CommandMap = Server::getInstance().get_CommandMap();
+	std::map<std::string, Command*>::const_iterator it = _CommandMap.find(cmd);
+	if (it != _CommandMap.end())
+		it->second->execute(args, this);
 	else
 		std::cout << "Unknown command: " << cmd << std::endl;
 }

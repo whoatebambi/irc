@@ -4,11 +4,12 @@
 #include "Client.hpp"
 
 #include <string>
-#include <vector>
+#include <map>
+#include <cctype>
 
 class Client;
 
-class CommandTopic : public Command
+class CommandKick : public Command
 {
 	public:
 		void	execute(const std::string &args, Client *client);
