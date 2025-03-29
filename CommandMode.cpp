@@ -41,21 +41,21 @@ void CommandMode::sendModes(Channel *chan, Client *client)
 	std::string modes = "+";
 	std::string params;
 
-	if (chan->isInviteOnly())
+	if (chan->get_inviteOnly())
 		modes += "i";
-	if (chan->isTopicLocked())
+	if (chan->get_topicLocked())
 		modes += "t";
-	if (!chan->getKey().empty()) {
+	if (!chan->get_key().empty()) {
 		modes += "k";
-		params += " " + chan->getKey();
+		params += " " + chan->get_key();
 	}
-	if (chan->getUserLimit() > 0) {
+	if (chan->get_userLimit() > 0) {
 		modes += "l";
 		std::stringstream ss;
-		ss << chan->getUserLimit();
+		ss << chan->get_userLimit();
 		params += " " + ss.str();
 	}
-	Reply::sendNumReply(client, RPL_CHANNELMODEIS, chan->getName(), modes + params);
+	Reply::sendNumReply(client, RPL_CHANNELMODEIS, chan->get_name(), modes + params);
 }
 
 void CommandMode::applyModes(Channel* channel, Client *client, const std::vector<std::string>& args)
@@ -76,12 +76,12 @@ void CommandMode::applyModes(Channel* channel, Client *client, const std::vector
 			Reply::sendNumReply(client, ERR_UNKNOWNMODE, std::string(1, c));
 	}
 	if (!ctx.modes.empty())
-		Reply::sendBroadcast(channel->get_membersFd(), client, "MODE " + channel->getName() + " " + ctx.modes + ctx.params);
+		Reply::sendBroadcast(channel->getMembersFdSet(), client, "MODE " + channel->get_name() + " " + ctx.modes + ctx.params);
 }
 
 void CommandMode::handleMode_i(CommandContext &ctx)
 {
-	ctx.channel->setInviteOnly(ctx.adding);
+	ctx.channel->set_inviteOnly(ctx.adding);
 	if (ctx.adding)
 		ctx.modes += "+i";
 	else
@@ -104,16 +104,16 @@ void CommandMode::handleMode_k(CommandContext &ctx)
 		if (ctx.index >= ctx.args.size())
 			return;
 
-		if (!ctx.channel->getKey().empty())
-			return (Reply::sendNumReply(ctx.client, ERR_KEYSET, ctx.channel->getName()));	
+		if (!ctx.channel->get_key().empty())
+			return (Reply::sendNumReply(ctx.client, ERR_KEYSET, ctx.channel->get_name()));	
 
-		ctx.channel->setKey(ctx.args[ctx.index]);
+		ctx.channel->set_key(ctx.args[ctx.index]);
 		ctx.modes += "+k";
 		ctx.params += " " + ctx.args[ctx.index++];
 	}
 	else
 	{
-		ctx.channel->setKey("");
+		ctx.channel->set_key("");
 		ctx.modes += "-k";
 	}
 }
@@ -133,13 +133,13 @@ void CommandMode::handleMode_l(CommandContext &ctx)
 		if (limit <= 0)
 			return (Reply::sendNumReply(ctx.client, ERR_UNKNOWNMODE, "l"));
 		
-		ctx.channel->setUserLimit(limit);
+		ctx.channel->set_userLimit(limit);
 		ctx.modes += "+l";
 		ctx.params += " " + ctx.args[ctx.index++];
 	}
 	else
 	{
-		ctx.channel->setUserLimit(0);
+		ctx.channel->set_userLimit(0);
 		ctx.modes += "-l";
 	}
 }
@@ -150,7 +150,7 @@ void CommandMode::handleMode_o(CommandContext &ctx)
 		return;
 
 	std::string nick = ctx.args[ctx.index++];
-	Client* targetUser = Server::getInstance().findClient(nick);
+	Client* targetUser = Server::getInstance().get_client(nick);
 	if (!targetUser || !ctx.channel->isInChannel(targetUser))
 		return (Reply::sendNumReply(ctx.client, ERR_NOSUCHNICK, nick));
 

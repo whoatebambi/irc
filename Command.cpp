@@ -1,7 +1,7 @@
 #include "Command.hpp"
 
 // need to check edge cases with ":"
-std::vector<std::string> Command::splitArgs(const std::string &input)
+std::vector<std::string>	splitArgs(const std::string &input)
 {
 	std::vector<std::string> vec;
 	std::istringstream iss(input);
@@ -21,7 +21,7 @@ std::vector<std::string> Command::splitArgs(const std::string &input)
 	return (vec);
 }
 
-std::vector<std::string> Command::splitString(const std::string &str, char delimiter) 
+std::vector<std::string>	splitString(const std::string &str, char delimiter) 
 {
 	std::vector<std::string> result;
 	std::string item;

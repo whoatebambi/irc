@@ -55,8 +55,8 @@ Server::~Server()
 void Server::CloseFds()
 {
 	for(size_t i = 0; i < clientsTable.size(); i++){
-		std::cout << "Client <" << clientsTable[i]->getFd() << "> Disconnected" << std::endl;
-		close(clientsTable[i]->getFd());
+		std::cout << "Client <" << clientsTable[i]->get_fd() << "> Disconnected" << std::endl;
+		close(clientsTable[i]->get_fd());
 	}
 	if (_fd != -1) {
 		std::cout << "Server <" << _fd << "> disconnected" << std::endl;
@@ -166,8 +166,8 @@ void Server::handleClientData(const epoll_event &event)
 	int fd = event.data.fd;
 	for (size_t j = 0; j < clientsTable.size(); ++j)
 	{
-		if (clientsTable[j]->getFd() == fd) {
-			clientsTable[j]->ParseDataClient();
+		if (clientsTable[j]->get_fd() == fd) {
+			clientsTable[j]->parseDataClient();
 			break;
 		}
 	}
@@ -202,7 +202,7 @@ void Server::RemoveClient(int fd)
 {
 	for (size_t i = 0; i < this->clientsTable.size(); i++)
 	{
-		if (this->clientsTable[i]->getFd() == fd)
+		if (this->clientsTable[i]->get_fd() == fd)
 		{
 			this->clientsTable.erase(this->clientsTable.begin() + i);
 			return;
@@ -214,11 +214,11 @@ void Server::newChannel(Client *client, std::string chanName, std::string key)
 {
     Channel *newChan = new Channel(client, chanName, key);
     _channelMap.insert(std::make_pair(chanName, newChan));
-	newChan->getFounderMask() = client->get_mask();
+	newChan->set_founderMask(client->get_mask());
     newChan->joinChannel(client, key);
 }
 
-Client *Server::findClient(std::string &nickname)
+Client *Server::get_client(const std::string &nickname)
 {
 	for (size_t i = 0; i < clientsTable.size(); ++i)
 	{
@@ -238,6 +238,19 @@ bool	Server::isClient(std::string const &nickname)
 	return false;
 }
 
+bool	Server::isRegisteredClient(std::string const &nickname)
+{
+	for (size_t i = 0; i < clientsTable.size(); ++i)
+	{
+		if (clientsTable[i]->get_nickname() == nickname)
+		{
+			if (clientsTable[i]->get_isRegistered())
+				return (true);
+		}
+	}
+	return (false);
+}
+
 void Server::handleEpollWaitError()
 {
 	if (isLive())
@@ -247,6 +260,6 @@ void Server::handleEpollWaitError()
 void Server::handleEpollError(const epoll_event &event)
 {
 	std::cerr << "Epoll error on fd: " << event.data.fd << std::endl;
-	// unsubscribe(((MainSocket *)events[i].data.ptr)->getFd());
+	// unsubscribe(((MainSocket *)events[i].data.ptr)->get_fd());
 	RemoveClient(event.data.fd);
 }

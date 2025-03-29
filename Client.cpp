@@ -1,10 +1,10 @@
 #include "Client.hpp"
 
 Client::Client(int fd, std::string ip, int port)
+	: _fd(fd),
+	_ipadd(ip),
+	_port(port)
 {
-	this->_fd = fd;
-	this->_ipadd = ip;
-	this->_port = port;
 	this->_isAuth = false;
 	this->_nickname = "";
 	this->_username = "";
@@ -20,6 +20,7 @@ Client::Client(int fd, std::string ip, int port)
 	this->_CommandMap["PRIVMSG"] = new CommandPrivMsg();
 	this->_CommandMap["TOPIC"] = new CommandTopic();
 	this->_CommandMap["PART"] = new CommandPart();
+	this->_CommandMap["INVITE"] = new CommandInvite();
 }
 
 Client::~Client()
@@ -32,24 +33,7 @@ Client::~Client()
 	this->_CommandMap.clear();
 }
 
-std::string	Client::get_nickname() const {return _nickname;}
-void		Client::set_nickname(const std::string &nickname)
-{
-	_nickname = nickname;
-	set_mask();
-}
-std::string	Client::get_mask() const { return _mask; }
-void		Client::set_mask() { _mask = ":" + _nickname + "!" + _username + "@" + _ipadd; }
-bool		Client::getIsAuth() const {return this->_isAuth;}
-void		Client::setIsAuth() {this->_isAuth = true;}
-int			Client::getFd() const {return this->_fd;}
-std::string	Client::getSaved() const {return this->_saved; }
-std::string	Client::getUsername() const { return this->_username; }
-void		Client::setUsername(const std::string &username) { this->_username = username; }
-std::string	Client::getRealname() const { return this->_realname; }
-void		Client::setRealname(const std::string &realname) { this->_realname = realname; }
-
-void	Client::ParseDataClient()
+void	Client::parseDataClient()
 {
 	std::string line;
 
@@ -88,11 +72,11 @@ void	Client::ParseDataClient()
 			return;
 		}
 		if (!lineRead.empty())
-			parse(lineRead);
+			executeCommand(lineRead);
 	} while (pos != std::string::npos);
 }
 
-void Client::parse(std::string &line)
+void Client::executeCommand(std::string &line)
 {
 	std::cout << "<<< " << line;
 	size_t pos = line.find(' ');
@@ -112,7 +96,20 @@ std::string Client::ft_trim(const std::string &str)
 	return (end == std::string::npos) ? "" : str.substr(0, end + 1);
 }
 
+// remove if possible
 bool Client::isInList(const std::set<Client*> &list) const { return list.find(const_cast<Client*>(this)) != list.end();; }
 
-
-
+std::string	Client::get_nickname() const {return _nickname;}
+void		Client::set_nickname(const std::string &nickname) { _nickname = nickname; }
+std::string	Client::get_mask() const { return _mask; }
+void		Client::set_mask() { _mask = ":" + _nickname + "!" + _username + "@" + _ipadd; }
+bool		Client::get_isAuth() const {return this->_isAuth;}
+void		Client::set_isAuth() {this->_isAuth = true;}
+bool		Client::get_isRegistered() const {return this->_isRegistered;}
+void		Client::set_isRegistered() {this->_isRegistered = true;}
+int			Client::get_fd() const {return this->_fd;}
+std::string	Client::get_saved() const {return this->_saved; }
+std::string	Client::get_username() const { return this->_username; }
+void		Client::set_username(const std::string &username) { this->_username = username; }
+std::string	Client::get_realname() const { return this->_realname; }
+void		Client::set_realname(const std::string &realname) { this->_realname = realname; }

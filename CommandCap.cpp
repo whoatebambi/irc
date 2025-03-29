@@ -12,7 +12,7 @@ void CommandCap::execute(const std::string &args, Client *client)
 
 void CommandCap::sendWelcome(Client *client)
 {
-	if (client->get_nickname().empty() || client->getUsername().empty())
+	if (client->get_nickname().empty() || client->get_username().empty())
 		return;
 
 	std::string	serverName = Server::getInstance().getServerName();
