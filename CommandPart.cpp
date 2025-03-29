@@ -3,30 +3,37 @@
 void CommandPart::execute(const std::string &args, Client *client)
 {
 	// std::cout << INVERSE_BG << BLUE << "PART args: " BOLD << args << RESET << std::endl;
-	if (args.empty()) // already handled by Irssi but safe to add
+	if (args.empty())
 		return (Reply::sendNumReply(client, ERR_NEEDMOREPARAMS, "PART"));
 
 	std::vector<std::string> argsVector = splitArgs(args);
 	std::vector<std::string> channelVec = splitString(argsVector[0], ',');
 	std::string partMsg;
-	if (argsVector.size() >= 2)
-	{
-		partMsg = argsVector[1];
-		if (!isValidPartMsg(partMsg))
-			partMsg = ""; // drops silently
-	}
+	if (argsVector.size() < 2)
+		return (Reply::sendNumReply(client, ERR_NEEDMOREPARAMS, "PART"));
 
-	const std::map<std::string, Channel*> &channelMap = Server::getInstance().getChannelMap();
+	partMsg = argsVector[1];
+	if (!isValidPartMsg(partMsg))
+		partMsg = ""; // drop silently
+
+	const std::set<Channel*> &channelSet = Server::getInstance().getChannelSet();
 	for (std::vector<std::string>::const_iterator it = channelVec.begin(); it != channelVec.end(); ++it)
 	{
 		const std::string &channelName = *it;
-		std::map<std::string, Channel*>::const_iterator found = channelMap.find(channelName);
-		if (found == channelMap.end())
+		Channel *channel = NULL;
+		for (std::set<Channel*>::const_iterator itSet = channelSet.begin(); itSet != channelSet.end(); ++itSet)
+		{
+			if ((*itSet)->get_name() == channelName)
+			{
+				channel = *itSet;
+				break;
+			}
+		}
+		if (!channel)
 		{
 			Reply::sendNumReply(client, ERR_NOSUCHCHANNEL, channelName);
 			continue;
 		}
-		Channel *channel = found->second;
 		if (!channel->isInChannel(client))
 		{
 			Reply::sendNumReply(client, ERR_NOTONCHANNEL, channelName);

@@ -20,9 +20,9 @@ void	Channel::joinChannel(Client *client, const std::string &key)
 	if (!canJoin(client, key))
 		return;
 	this->_memberSet.insert(client);
-	Reply::sendBroadcast(getMembersFdSet(), client, " JOIN :" + get_name());
+	Reply::sendBroadcast(generateMembersFd(), client, " JOIN :" + get_name());
 	Reply::sendNumReply(client, RPL_TOPIC, get_topic());
-	Reply::sendNumReply(client, RPL_NAMREPLY, "= " + get_name() + getMembersNick());
+	Reply::sendNumReply(client, RPL_NAMREPLY, "= " + get_name() + generateMembersNick());
 	Reply::sendNumReply(client, RPL_ENDOFNAMES, get_name());
 }
 
@@ -41,26 +41,30 @@ bool	Channel::canJoin(Client *client, std::string key)
 void	Channel::partChannel(Client *client, const std::string &msgPart)
 {
 	if (msgPart == "")
-		Reply::sendBroadcast(getMembersFdSet(), client, " PART " + _name);
+		Reply::sendBroadcast(generateMembersFd(), client, " PART " + _name);
 	else
-		Reply::sendBroadcast(getMembersFdSet(), client, " PART " + _name + " :" + msgPart);
+		Reply::sendBroadcast(generateMembersFd(), client, " PART " + _name + " :" + msgPart);
 	this->_memberSet.erase(client);
 	this->_operatorSet.erase(client);
 }
 
+// Kick command
+void	Channel::removeMember(Client *client) { _memberSet.erase(client); }
+
 // Channel search
 Channel*	Channel::findChannel(std::string target)
 {
-	std::map<std::string, Channel*> _channelMap = Server::getInstance().getChannelMap();
-	for (std::map<std::string, Channel*>::iterator it = _channelMap.begin(); it != _channelMap.end(); ++it)
+	
+	std::set<Channel*> _channelSet = Server::getInstance().getChannelSet();
+	for (std::set<Channel*>::iterator it = _channelSet.begin(); it != _channelSet.end(); ++it)
 	{
-		if (it->first == target)
-			return it->second;
+		if ((*it)->get_name() == target)
+			return *it;
 	}
 	return (NULL);
 }
 
-std::string	Channel::getMembersNick() const
+std::string	Channel::generateMembersNick() const
 {
 	std::string str;
 	for (std::set<Client*>::const_iterator it = _memberSet.begin(); it != _memberSet.end(); ++it)
@@ -78,7 +82,17 @@ std::string	Channel::get_name() const { return (_name); }
 // Client search
 bool	Channel::isInChannel(Client *client) const { return client && _memberSet.find(client) != _memberSet.end(); }
 
-std::set<int>	Channel::getMembersFdSet() const
+bool	Channel::isInChannel(const std::string &nickname) const
+{
+	for (std::set<Client*>::const_iterator it = _memberSet.begin(); it != _memberSet.end(); ++it)
+	{
+		if ((*it)->get_nickname() == nickname)
+			return true;
+	}
+	return false;
+}
+
+std::set<int>	Channel::generateMembersFd() const
 {
 	std::set<int> fdSet;
 	for (std::set<Client*>::const_iterator it = _memberSet.begin(); it != _memberSet.end(); ++it)
@@ -103,6 +117,7 @@ size_t	Channel::get_userLimit() const { return (_userLimit); }
 void	Channel::set_inviteOnly(bool mode) { _inviteOnly = mode; }
 bool	Channel::get_inviteOnly() const { return (_inviteOnly); }
 void	Channel::addInvite(Client *client) { _invitedSet.insert(client); }
+void	Channel::removeInvite(Client *client) { _invitedSet.erase(client); }
 bool	Channel::isInvited(Client *client) const { return (_invitedSet.find(client) != _invitedSet.end()); }
 
 // Topic lock mode

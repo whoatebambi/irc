@@ -13,6 +13,7 @@
 #include "CommandTopic.hpp"
 #include "CommandPart.hpp"
 #include "CommandInvite.hpp"
+#include "CommandKick.hpp"
 #include "Channel.hpp"
 
 #include <cstdarg>
@@ -36,6 +37,7 @@ class CommandPing;
 class CommandTopic;
 class CommandPart;
 class CommandInvite;
+class CommandKick;
 
 class Client
 {

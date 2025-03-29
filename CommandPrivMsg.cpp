@@ -1,51 +1,72 @@
 #include "CommandPrivMsg.hpp"
 
+static void	handleChannelMsg(const std::string &target, const std::string &msgArg, Client *client);
+static void	handlePrivateMsg(const std::string &target, const std::string &msgArg, Client *client);
+
 void CommandPrivMsg::execute(const std::string &args, Client *client)
 {
-	std::vector<std::string> argsVec = splitArgs(args);
-	std::string msgArg = "";
+	// std::cout << INVERSE_BG << BLUE << "PRIVMSG args: " BOLD << args << RESET << std::endl;
+	if (args.empty())
+		return (Reply::sendNumReply(client, ERR_NEEDMOREPARAMS, "PRIVMSG"));
 
-	if (argsVec.size() > 1)
-		msgArg = argsVec[1];
-	if (!argsVec[0].empty())
+	std::vector<std::string> argsVec = splitArgs(args);
+	if (argsVec.empty() || argsVec[0].empty())
+		return (Reply::sendNumReply(client, ERR_NORECIPIENT, "PRIVMSG"));
+
+	std::string target = argsVec[0];
+	std::string msgArg = argsVec.size() > 1 ? argsVec[1] : "";
+
+	if (msgArg.empty())
+		return (Reply::sendNumReply(client, ERR_NOTEXTTOSEND, ""));
+
+	if (target[0] == '#')
+		handleChannelMsg(target, msgArg, client);
+	else
+		handlePrivateMsg(target, msgArg, client);
+}
+
+void	handleChannelMsg(const std::string &target, const std::string &msgArg, Client *client)
+{
+	const std::set<Channel*> &channelSet = Server::getInstance().getChannelSet();
+	Channel *channel = NULL;
+
+	for (std::set<Channel*>::const_iterator it = channelSet.begin(); it != channelSet.end(); ++it)
 	{
-		if (argsVec[0][0] == '#' || argsVec[0][0] == '&')
+		if (sameString((*it)->get_name(), target))
 		{
-			std::map<std::string, Channel *> channel = Server::getInstance().getChannelMap();
-			std::map<std::string, Channel *>::const_iterator it = channel.begin();
-			for ( ; it != channel.end(); ++it)
-			{
-				if (sameString(argsVec[0], it->first))
-				{
-					if (client->isInList(it->second->get_memberSet())) // to check, why would it need channel info?
-					{
-						std::set<int> fdSet = it->second->getMembersFdSet();
-						fdSet.erase(client->get_fd());
-						Reply::sendBroadcast(fdSet, client, "PRIVMSG " + argsVec[0] + " :" + msgArg);  // check ":"
-						break ;
-					}
-					else
-						return (Reply::sendNumReply(client, ERR_CANNOTSENDTOCHAN, argsVec[0]));
-				}
-			}
-			if (it == channel.end())
-				return (Reply::sendNumReply(client, ERR_NOSUCHCHANNEL, argsVec[0]));
-		}
-		else
-		{
-			std::vector<Client *> clientsVec = Server::getInstance().getClients();
-			std::vector<Client *>::const_iterator it2 = clientsVec.begin();
-			for ( ; it2 != clientsVec.end(); ++it2)
-			{
-				if (argsVec[0] == (*it2)->get_nickname())
-				{
-					Reply::sendNumReply((*it2), RPL_AWAY, "PRIVMSG", argsVec[0] + " " + msgArg);
-					break ;
-				}
-			}
-			if (it2 == clientsVec.end())
-				return (Reply::sendNumReply(client, ERR_NOSUCHNICK, client->get_nickname()));
+			channel = *it;
+			break;
 		}
 	}
-	return;
+
+	if (!channel)
+		return (Reply::sendNumReply(client, ERR_NOSUCHCHANNEL, target));
+
+	if (!client->isInList(channel->get_memberSet()))
+		return (Reply::sendNumReply(client, ERR_CANNOTSENDTOCHAN, target));
+
+	std::set<int> fdSet = channel->generateMembersFd();
+	fdSet.erase(client->get_fd());
+
+	Reply::sendBroadcast(fdSet, client, "PRIVMSG " + target + " :" + msgArg);
+}
+
+void	handlePrivateMsg(const std::string &target, const std::string &msgArg, Client *client)
+{
+	const std::vector<Client*> &clients = Server::getInstance().getClients();
+	Client *receiver = NULL;
+
+	for (std::vector<Client*>::const_iterator it = clients.begin(); it != clients.end(); ++it)
+	{
+		if ((*it)->get_nickname() == target)
+		{
+			receiver = *it;
+			break;
+		}
+	}
+
+	if (!receiver)
+		return (Reply::sendNumReply(client, ERR_NOSUCHNICK, target));
+
+	Reply::sendNumReply(receiver, RPL_AWAY, "PRIVMSG", target + " " + msgArg);
 }

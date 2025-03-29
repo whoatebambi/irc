@@ -15,6 +15,7 @@
 #include <csignal>
 #include <cstdlib>
 #include <map>
+#include <set>
 
 #define INVERSE "\033[7m"
 #define RED "\033[31m"
@@ -39,7 +40,7 @@ class Server
 		struct sockaddr_in	cliadd;
 		int	epoll_fd;
 		static const int	MAX_EVENTS = 10;
-		std::map<std::string, Channel*> _channelMap; // maybe refactor to <set>
+		std::set<Channel*> _channelSet;
 
 	public:
 		Server();
@@ -61,12 +62,13 @@ class Server
 		void	handleEpollWaitError();
 		void	handleEpollError(const epoll_event &event);
 
-		void	newChannel(Client *client, std::string chanName, std::string key);
+		void	newChannel(Client *client, std::string name, std::string key);
 
 		Client *get_client(std::string const &nickname);
 		bool	isClient(std::string const &nickname);
 		bool	isRegisteredClient(std::string const &nickname);
 		std::vector<Client*>	getClientsTable() const ;
 		std::string	getServerName() const;
-		std::map<std::string, Channel*> const	&getChannelMap() const;
+		// std::map<std::string, Channel*> const	&getChannelMap() const;
+		std::set<Channel*> const	&getChannelSet() const;
 };

@@ -34,7 +34,7 @@ Server::Server(){ this->_fd = -1; this->_serverName = "Servito"; }
 std::string Server::getServerName() const { return this->_serverName; }
 std::vector<Client*> Server::getClientsTable() const { return this->clientsTable; }
 
-std::map<std::string, Channel*> const	&Server::getChannelMap() const { return this->_channelMap; }
+std::set<Channel*> const	&Server::getChannelSet() const { return this->_channelSet; }
 
 Server::~Server()
 {
@@ -45,9 +45,9 @@ Server::~Server()
 		delete *it;
 	clientsTable.clear();
 
-	for (std::map<std::string, Channel*>::iterator it = _channelMap.begin(); it != _channelMap.end(); ++it)
-		delete it->second;
-    _channelMap.clear();
+	for (std::set<Channel*>::iterator it = _channelSet.begin(); it != _channelSet.end(); ++it)
+		delete (*it);
+	_channelSet.clear();
 
     close(this->_fd);
 }
@@ -210,12 +210,12 @@ void Server::RemoveClient(int fd)
 	}
 }
 
-void Server::newChannel(Client *client, std::string chanName, std::string key)
+void Server::newChannel(Client *client, std::string name, std::string key)
 {
-    Channel *newChan = new Channel(client, chanName, key);
-    _channelMap.insert(std::make_pair(chanName, newChan));
-	newChan->set_founderMask(client->get_mask());
-    newChan->joinChannel(client, key);
+    Channel *channel = new Channel(client, name, key);
+	_channelSet.insert(channel);
+	channel->set_founderMask(client->get_mask());
+    channel->joinChannel(client, key);
 }
 
 Client *Server::get_client(const std::string &nickname)
@@ -225,7 +225,7 @@ Client *Server::get_client(const std::string &nickname)
 		if (clientsTable[i]->get_nickname() == nickname)
 			return clientsTable[i];
 	}
-	return NULL;
+	return (NULL);
 }
 
 bool	Server::isClient(std::string const &nickname)

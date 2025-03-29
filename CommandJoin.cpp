@@ -10,26 +10,24 @@ void CommandJoin::execute(const std::string &args, Client *client)
 	if (argMap.empty())
 		return;
 
-	// for (std::map<std::string, std::string>::iterator it = argMap.begin(); it != argMap.end(); ++it)
-	// 	std::cout << "Channel: " << it->first << ", Key: " << it->second << std::endl;
-	const std::map<std::string, Channel*> &channelMap = Server::getInstance().getChannelMap();
+	const std::set<Channel*> &channelSet = Server::getInstance().getChannelSet();
 	for (std::map<std::string, std::string>::const_iterator it = argMap.begin(); it != argMap.end(); ++it)
 	{
 		const std::string &channelName = it->first;
 		const std::string &key = it->second;
-        std::map<std::string, Channel*>::const_iterator it2 = channelMap.begin();
-        for (; it2 != channelMap.end(); ++it2)
+        std::set<Channel*>::const_iterator it2 = channelSet.begin();
+        for (; it2 != channelSet.end(); ++it2)
         {
-            if (sameString(channelName, it2->first))
+            if (sameString(channelName, (*it2)->get_name()))
             {
-				Channel *channel = it2->second;
+				Channel *channel = *it2;
 				if (channel->isInChannel(client))
 					return; // client is already in channel
 				channel->joinChannel(client, key);
 				break;
             }
         }
-        if (it2 == channelMap.end())      
+        if (it2 == channelSet.end())      
 			Server::getInstance().newChannel(client, it->first, it->second);
     }
 	// •	Add the user to the channel’s member list.

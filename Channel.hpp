@@ -35,14 +35,18 @@ class Channel
 		// Part command
 		void	partChannel(Client *client, const std::string &msgPart);
 
+		// Kick command
+		void	removeMember(Client* client);
+
 		// Channel search
 		static Channel*	findChannel(std::string target);
-		std::string	getMembersNick() const;
+		std::string	generateMembersNick() const;
 		std::string	get_name() const;
 				
 		// Client search
 		bool	isInChannel(Client* client) const;
-		std::set<int>	getMembersFdSet() const;
+		bool	isInChannel(const std::string &nickname) const;
+		std::set<int>	generateMembersFd() const;
 		std::set<Client*> const	&get_memberSet() const;
 
 		// Channel key
@@ -60,6 +64,7 @@ class Channel
 		void	set_inviteOnly(bool mode);
 		bool	get_inviteOnly() const;
 		void	addInvite(Client *client);
+		void	removeInvite(Client *client);
 		bool	isInvited(Client *client) const;
 
 		// Topic lock mode

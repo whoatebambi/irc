@@ -51,6 +51,7 @@
 #define ERR_NOTONCHANNEL		442 // ✅ "<channel> :You're not on that channel"
 #define ERR_NEEDMOREPARAMS		461	// ✅ "<command> :Not enough parameters"
 #define ERR_CHANOPRIVSNEEDED	482 // ✅ "<channel> :You're not channel operator"
+#define ERR_INVALIDTOPIC		999 // ✅ "<channel> :Topic is invalid"
 
 //////////// INVITE replies & errors:
 // CHANNEL OPERATORS ONLY: Invite a client to an invite-only channel (mode +i)
@@ -63,11 +64,11 @@
 
 //////////// KICK replies & errors:
 // CHANNEL OPERATORS ONLY: Eject a client from the channel
-#define ERR_NOSUCHCHANNEL		403	// "<channel name> :No such channel"
-#define ERR_NOTONCHANNEL		442 // "<channel> :You're not on that channel"
-#define ERR_NEEDMOREPARAMS		461	// "<command> :Not enough parameters"
-#define ERR_BADCHANMASK			476 // "<channel> :Bad channel mask"
-#define ERR_CHANOPRIVSNEEDED	482 // "<channel> :You're not channel operator"
+#define ERR_NOSUCHCHANNEL		403	// ✅ "<channel name> :No such channel"
+#define ERR_USERNOTINCHANNEL	441 // ✅ "<client> <nick> <channel> :They aren't on that channel"
+#define ERR_NOTONCHANNEL		442 // ✅ "<channel> :You're not on that channel"
+#define ERR_NEEDMOREPARAMS		461	// ✅ "<command> :Not enough parameters"
+#define ERR_CHANOPRIVSNEEDED	482 // ✅ "<channel> :You're not channel operator"
 
 //////////// MODE replies & errors:
 // CHANNEL OPERATORS ONLY: Change the channel's mode

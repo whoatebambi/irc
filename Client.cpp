@@ -21,6 +21,7 @@ Client::Client(int fd, std::string ip, int port)
 	this->_CommandMap["TOPIC"] = new CommandTopic();
 	this->_CommandMap["PART"] = new CommandPart();
 	this->_CommandMap["INVITE"] = new CommandInvite();
+	this->_CommandMap["KICK"] = new CommandKick();
 }
 
 Client::~Client()
