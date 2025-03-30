@@ -65,9 +65,9 @@ void Client::executeCommand(std::string &line)
 	if (pos != std::string::npos) 
 		{args = ft_trim(line.substr(pos + 1));}
 
-	const std::map<std::string, Command*> &_CommandMap = Server::getInstance().get_CommandMap();
-	std::map<std::string, Command*>::const_iterator it = _CommandMap.find(cmd);
-	if (it != _CommandMap.end())
+	const std::map<std::string, Command*> &_commandMap = Server::getInstance().get_CommandMap();
+	std::map<std::string, Command*>::const_iterator it = _commandMap.find(cmd);
+	if (it != _commandMap.end())
 		it->second->execute(args, this);
 	else
 		std::cout << "Unknown command: " << cmd << std::endl;

@@ -84,7 +84,7 @@ void Reply::sendNumReply(Client *client, int numericCode) // sendError
 		return;
 
 	std::ostringstream msg;
-	msg << ":" << Server::getInstance().get_serverName() << " " << numericCode << " " << client->get_nickname();
+	msg << ":" << Server::getInstance().get_host() << " " << numericCode << " " << client->get_nickname();
 	msg << getErrorMessage(numericCode) << "\r\n";
 
 	std::cout << INVERSE_BG << RED << ">>> " << BOLD << msg.str() << RESET << std::endl;
@@ -97,7 +97,7 @@ void Reply::sendNumReply(Client *client, int numericCode, const std::string &str
 		return;
 
 	std::ostringstream msg;
-	msg << ":" << Server::getInstance().get_serverName() << " " << numericCode << " " << client->get_nickname();
+	msg << ":" << Server::getInstance().get_host() << " " << numericCode << " " << client->get_nickname();
 	if (!str1.empty())
 		msg << " " << str1;
 	msg << getErrorMessage(numericCode) << "\r\n";
@@ -112,7 +112,7 @@ void Reply::sendNumReply(Client *client, int numericCode, const std::string &str
 		return;
 
 	std::ostringstream msg;
-	msg << ":" << Server::getInstance().get_serverName() << " " << numericCode << " " << client->get_nickname();
+	msg << ":" << Server::getInstance().get_host() << " " << numericCode << " " << client->get_nickname();
 	if (!str1.empty())
 		msg << " " << str1;
 	if (!str2.empty())
