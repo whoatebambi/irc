@@ -1,10 +1,8 @@
-#ifndef POLLEVENT_HPP
-#define POLLEVENT_HPP
+#pragma once
 
-struct PollEvent {
+struct PollEvent
+{
 	int fd;
 	bool readable;
 	bool error;
 };
-
-#endif

@@ -1,6 +1,6 @@
 #include "Server.hpp"
 
-Server::Server() : _fd(-1), _host("Jean-Claude") { }
+Server::Server() : _fd(-1), _serverName("Jean-Claude") { }
 
 Server::~Server()
 {
@@ -39,6 +39,7 @@ void Server::init(std::string port, std::string password)
 	bindAndListen();
 	setupPoller();
 	addServerSocketToPoller();
+	Reply::initReplies();
 	initCommandMap();
 
 	std::cout << "Server <" << _fd << "> listening on _port " << _port << std::endl;
@@ -120,7 +121,7 @@ void Server::closeFds()
 
 // Server getters/setters
 
-const std::string &Server::get_host() const { return (_host); }
+const std::string &Server::get_serverName() const { return (_serverName); }
 bool Server::is_running () const { return (_running); }
 const std::string &Server::get_password() const { return (_password); }
 const std::map<std::string, Command*> &Server::get_CommandMap() const { return (_commandMap); }
@@ -191,9 +192,9 @@ int Server::acceptSocketClient()
 
 void Server::createAndStoreClient(int clientFd)
 {
-	std::string ip = inet_ntoa(_cliadd.sin_addr);
+	std::string hostname = inet_ntoa(_cliadd.sin_addr);
 	int port = ntohs(_cliadd.sin_port);
-	Client* clientObject = new Client(clientFd, ip, port);
+	Client* clientObject = new Client(clientFd, hostname, port);
 	_clientVec.push_back(clientObject);
 	std::cout << "Client <" << clientFd << "> Connected" << std::endl;
 }
@@ -217,13 +218,39 @@ void Server::addChannel(Client *client, std::string name, std::string key)
 	channel->joinChannel(client, key);
 }
 
+// void Server::removeClient(int fd)
+// {
+// 	for (size_t i = 0; i < this->_clientVec.size(); i++)
+// 	{
+// 		if (this->_clientVec[i]->get_fd() == fd)
+// 		{
+// 			delete _clientVec[i];
+// 			this->_clientVec.erase(this->_clientVec.begin() + i);
+// 			return;
+// 		}
+// 	}
+// }
 void Server::removeClient(int fd)
 {
-	for (size_t i = 0; i < this->_clientVec.size(); i++)
+	for (size_t i = 0; i < this->_clientVec.size(); ++i)
 	{
-		if (this->_clientVec[i]->get_fd() == fd)
+		Client* client = this->_clientVec[i];
+		if (client->get_fd() == fd)
 		{
-			delete _clientVec[i];
+			// 1. Remove client from all channels
+			for (std::set<Channel*>::iterator it = _channelSet.begin(); it != _channelSet.end(); )
+			{
+				Channel* channel = *it;
+				channel->removeMember(client);
+				channel->removeInvite(client);
+				channel->removeOperator(client);
+				// Optionally delete empty channels
+			}
+			// 2. Remove nickname if you track it (you probably should)
+			// e.g. _nickMap.erase(client->getNickname());
+			_poller->unregisterFd(fd);
+			close(fd);
+			delete (client);
 			this->_clientVec.erase(this->_clientVec.begin() + i);
 			return;
 		}

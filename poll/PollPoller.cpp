@@ -1,7 +1,4 @@
 #include "PollPoller.hpp"
-#include <iostream>
-#include <unistd.h>
-#include <cstring> // for memset
 
 PollPoller::PollPoller() {}
 
@@ -40,6 +37,18 @@ bool PollPoller::remove(int fd)
 	_fds.pop_back();
 	_fdIndexMap.erase(it);
 	return true;
+}
+
+void PollPoller::unregisterFd(int fd)
+{
+	for (std::vector<pollfd>::iterator it = _fds.begin(); it != _fds.end(); ++it)
+	{
+		if (it->fd == fd)
+		{
+			_fds.erase(it);
+			break;
+		}
+	}
 }
 
 int PollPoller::wait(PollEvent* outEvents, int maxEvents, int timeout)

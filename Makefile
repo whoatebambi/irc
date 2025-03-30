@@ -14,7 +14,8 @@ FLAG		=	-Wall -Wextra -Werror -std=c++98 -Ipoll
 C_FILES		=	main.cpp Client.cpp Server.cpp Channel.cpp Command.cpp Reply.cpp \
 				poll/PollPoller.cpp poll/PollerFactory.cpp \
 				CommandCap.cpp CommandNick.cpp CommandUser.cpp CommandMode.cpp CommandJoin.cpp CommandPass.cpp \
-				CommandPing.cpp CommandPrivMsg.cpp CommandTopic.cpp CommandPart.cpp CommandInvite.cpp CommandKick.cpp\
+				CommandPing.cpp CommandPrivMsg.cpp CommandTopic.cpp CommandPart.cpp CommandInvite.cpp \
+				CommandKick.cpp\
 
 ifeq ($(UNAME_S), Linux)
 	C_FILES += poll/EpollPoller.cpp

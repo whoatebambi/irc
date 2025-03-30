@@ -2,10 +2,10 @@
 
 #include "Client.hpp"
 #include "Reply.hpp"
-#include "PollerFactory.hpp"
-#include "Poller.hpp"
-#include "EpollPoller.hpp"
-#include "PollPoller.hpp"
+#include "poll/PollerFactory.hpp"
+#include "poll/Poller.hpp"
+#include "poll/EpollPoller.hpp"
+#include "poll/PollPoller.hpp"
 
 #include "Command.hpp"
 #include "CommandCap.hpp"
@@ -50,7 +50,7 @@ class Server
 	private:
 		Poller* _poller;
 		int			_fd;
-		std::string	_host;
+		std::string	_serverName;
 		bool		_running; // need static?
 		int			_port;
 		std::string _password;
@@ -77,7 +77,7 @@ class Server
 		void	closeFds();
 
 		// Server getters/setters
-		const std::string	&get_host() const;
+		const std::string	&get_serverName() const;
 		bool				is_running() const;
 		const std::string	&get_password() const;
 		const std::map<std::string, Command*> &get_CommandMap() const;

@@ -47,7 +47,8 @@ void performKick(Channel *channel, Client *client, Client *toKick, const std::st
 	if (!kickMsg.empty())
 		msg += " :" + kickMsg;
 	Reply::sendBroadcast(channel->generateMembersFd(), client, msg);
-	channel->removeMember(toKick);
-	channel->removeInvite(toKick);
-	channel->removeOperator(toKick);
+	Server::getInstance().removeClient(toKick->get_fd());
+	// channel->removeMember(toKick);
+	// channel->removeInvite(toKick);
+	// channel->removeOperator(toKick);
 }

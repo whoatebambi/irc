@@ -96,6 +96,10 @@
 //////////// QUIT replies & errors:
 // none
 
+//////////// WHO replies & errors:
+#define RPL_WHOREPLY			352 // "<client> <channel> <username> <host> <server> <nick> <flags> :<hopcount> <realname>"
+#define RPL_ENDOFWHO			315 // "<name> :End of /WHO list"
+
 // optional: USERS to show users, NAMES to show @ ops, LIST channels and topics, OPER
 
 

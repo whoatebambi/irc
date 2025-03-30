@@ -15,7 +15,7 @@ void CommandCap::sendWelcome(Client *client)
 	if (client->get_nickname().empty() || client->get_username().empty())
 		return;
 
-	const std::string	&serverName = Server::getInstance().get_host();
+	const std::string	&serverName = Server::getInstance().get_serverName();
 	std::string	nickname = client->get_nickname();
 	const std::string &version = "1.0.0";
 	const std::string &userModes = "aiwroOs"; // dummy set of user modes
