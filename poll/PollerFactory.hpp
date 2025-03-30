@@ -1,8 +1,5 @@
-#ifndef POLLERFACTORY_HPP
-#define POLLERFACTORY_HPP
+#pragma once
 
 #include "Poller.hpp"
 
 Poller* createPoller();
-
-#endif

@@ -1,26 +1,27 @@
 #ifdef __linux__
 
-#ifndef EPOLLPOLLER_HPP
-#define EPOLLPOLLER_HPP
+#pragma once
 
 #include "Poller.hpp"
+
 #include <sys/epoll.h>
 #include <unistd.h>
+#include <stdexcept>
+#include <iostream>
 
 class EpollPoller : public Poller {
 private:
-	int _epollFd;
+	int	_epollFd;
 
 public:
 	EpollPoller();
 	~EpollPoller();
 
-	bool add(int fd);
-	bool remove(int fd);
-	int	wait(PollEvent* outEvents, int maxEvents, int timeout);
-	int getFd() const;
+	bool	add(int fd);
+	bool	remove(int fd);
+	void	unregisterFd(int fd);
+	int		wait(PollEvent* outEvents, int maxEvents, int timeout);
+	int		getFd() const;
 };
-
-#endif // EPOLLPOLLER_HPP
 
 #endif // __linux__

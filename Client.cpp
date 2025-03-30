@@ -1,14 +1,14 @@
 #include "Client.hpp"
 
-Client::Client(int fd, std::string ip, int port)
+Client::Client(int fd, std::string hostname, int port)
 	: _fd(fd),
-	_ipadd(ip),
+	_hostname(hostname),
 	_port(port)
 {
-	this->_isAuth = false;
-	this->_nickname = "";
-	this->_username = "";
-	this->_realname = "";
+	_isAuth = false;
+	_nickname = "";
+	_username = "";
+	_realname = "";
 }
 
 Client::~Client() {}
@@ -17,23 +17,20 @@ void	Client::parseDataClient()
 {
 	std::string line;
 
-	if (!this->_saved.empty())
+	if (!_saved.empty())
 	{
-		line += this->_saved;
-		this->_saved.clear();
+		line += _saved;
+		_saved.clear();
 	}
 
 	char buffer[1024];
 	memset(buffer, 0, sizeof(buffer));
-	ssize_t bytes = recv(this->_fd, buffer, sizeof(buffer) - 1 , 0);
+	ssize_t bytes = recv(_fd, buffer, sizeof(buffer) - 1 , 0);
 	line += buffer;
 	if (line.empty() || bytes == -1)
 	{
-		return Server::getInstance().removeClient(this->_fd); // swap fd for (Client *client)
-		// removeClient(fd);
-		// RemoveFds(fd);
-		std::cout << "Client <" << this->_fd << "> Disconnected" << std::endl;
-		// close(fd);
+		return Server::getInstance().removeClient(_fd);
+		std::cout << "Client <" << _fd << "> Disconnected" << std::endl;
 	}
 	
 	// check if in list
@@ -48,7 +45,7 @@ void	Client::parseDataClient()
 		line = line.erase(0, pos);
 		if (pos == std::string::npos && !lineRead.empty())
 		{
-			this->_saved = lineRead;
+			_saved = lineRead;
 			return;
 		}
 		if (!lineRead.empty())
@@ -82,17 +79,18 @@ std::string Client::ft_trim(const std::string &str)
 // remove if possible
 bool Client::isInList(const std::set<Client*> &list) const { return list.find(const_cast<Client*>(this)) != list.end();; }
 
-std::string	Client::get_nickname() const {return _nickname;}
+const std::string	&Client::get_hostname() const { return _hostname; };
+std::string	Client::get_nickname() const { return _nickname; }
 void		Client::set_nickname(const std::string &nickname) { _nickname = nickname; }
 std::string	Client::get_mask() const { return _mask; }
-void		Client::set_mask() { _mask = ":" + _nickname + "!" + _username + "@" + _ipadd; }
-bool		Client::get_isAuth() const {return this->_isAuth;}
-void		Client::set_isAuth() {this->_isAuth = true;}
-bool		Client::get_isRegistered() const {return this->_isRegistered;}
-void		Client::set_isRegistered() {this->_isRegistered = true;}
-int			Client::get_fd() const {return this->_fd;}
-std::string	Client::get_saved() const {return this->_saved; }
-std::string	Client::get_username() const { return this->_username; }
-void		Client::set_username(const std::string &username) { this->_username = username; }
-std::string	Client::get_realname() const { return this->_realname; }
-void		Client::set_realname(const std::string &realname) { this->_realname = realname; }
+void		Client::set_mask() { _mask = ":" + _nickname + "!" + _username + "@" + _hostname; }
+bool		Client::get_isAuth() const { return _isAuth; }
+void		Client::set_isAuth() { _isAuth = true;}
+bool		Client::get_isRegistered() const { return _isRegistered; }
+void		Client::set_isRegistered() { _isRegistered = true; }
+int			Client::get_fd() const { return _fd; }
+std::string	Client::get_saved() const {return _saved; }
+std::string	Client::get_username() const { return _username; }
+void		Client::set_username(const std::string &username) { _username = username; }
+std::string	Client::get_realname() const { return _realname; }
+void		Client::set_realname(const std::string &realname) { _realname = realname; }
