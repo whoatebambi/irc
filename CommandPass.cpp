@@ -6,7 +6,7 @@ void CommandPass::execute(const std::string &args, Client *client)
 
 	if (args.empty())
 		return (Reply::sendNumReply(client, ERR_NEEDMOREPARAMS, "PASS"));
-	if (args == (Server::getInstance().get_pass()))
+	if (args == (Server::getInstance().get_password()))
 	{
 		if (!client->get_isAuth())
 			client->set_isAuth();

@@ -10,13 +10,20 @@ void handleSignal(int signal)
 
 int	main(int argc, char **argv)
 {
+	// if (argc != 3) 
+	// {
+	(void)argc;
+	(void)argv;
+	// const std::string port = "4444";
+	// const std::string password = "1234";
+	// }
+	// if argv[1] or argv[2] check fails
+		// return (1);
 	try {
 		std::signal(SIGINT, handleSignal);
-		if (argc > 1)
-			Server::getInstance().init(argv);
-		else
-			Server::getInstance().init();
-		while(Server::getInstance().is_live())
+		// Server::getInstance().init(argv[1], argv[2]);
+		Server::getInstance().init("4444", "1234");
+		while(Server::getInstance().is_running())
 			Server::getInstance().monitor();
 	}
 	catch(const std::exception &e) {

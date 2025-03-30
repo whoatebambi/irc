@@ -1,6 +1,6 @@
 #include "Server.hpp"
 
-Server::Server() : _fd(-1), _serverName("Jean-Claude") { }
+Server::Server() : _fd(-1), _host("Jean-Claude") { }
 
 Server::~Server()
 {
@@ -15,9 +15,10 @@ Server::~Server()
 		delete (*it);
 	_channelSet.clear();
 
-	for (std::map<std::string, Command*>::iterator it = _CommandMap.begin(); it != _CommandMap.end(); ++it)
+	for (std::map<std::string, Command*>::iterator it = _commandMap.begin(); it != _commandMap.end(); ++it)
 		delete it->second;
-	_CommandMap.clear();
+	_commandMap.clear();
+	delete _poller;
 }
 
 // Initialize the server
@@ -28,101 +29,80 @@ Server &Server::getInstance()
 	return (instance);
 }
 
-void Server::init()
+void Server::init(std::string port, std::string password)
 {
-	this->_live = true;
-	this->_port = 4444;
-	this->_pass = "1234";
-	this->_fd = socket(AF_INET, SOCK_STREAM, 0); // Create a socket
-	if (this->_fd == -1)
-		throw std::runtime_error("socket() failed");
+	_running = true;
+	_port = atoi(port.c_str());
+	_password = password;
 
-	int opt = 1; // Set socket options
-	if (setsockopt(this->_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
-		throw std::runtime_error("setsockopt() failed");
-
-	sockaddr_in server_addr; // Bind the socket to an address and _port
-	server_addr.sin_family = AF_INET;
-	server_addr.sin_addr.s_addr = INADDR_ANY;
-	server_addr.sin_port = htons(this->_port);
-	if (bind(this->_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1)
-		throw std::runtime_error("bind() failed");
-		
-	if (listen(this->_fd, SOMAXCONN) == -1) // Listen for incoming connections
-		throw std::runtime_error("listen() failed");
-
-	this->_epollFd = epoll_create1(0); // Create an epoll instance
-	if (this->_epollFd == -1)
-		throw std::runtime_error("epoll_create1() failed");
-
-	struct epoll_event event; // Add the server socket to the epoll instance
-	event.events = EPOLLIN;
-	event.data.fd = this->_fd;
-	if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, this->_fd, &event) == -1)
-		throw std::runtime_error("epoll_ctl() failed");
-	std::cout << "Server <" << this->_fd << "> listening on port " << _port << "\n";
-	std::cout << "key is : " << _pass << "\n";
-	Reply::initReplies();
+	createServerSocket();
+	bindAndListen();
+	setupPoller();
+	addServerSocketToPoller();
 	initCommandMap();
+
+	std::cout << "Server <" << _fd << "> listening on _port " << _port << std::endl;
+	std::cout << "key is : " << _password << std::endl;
 }
 
-void Server::init(char **argv)
+void Server::createServerSocket()
 {
-	this->_live = true;
-	this->_port = atoi(argv[1]);
-	//parser _port
-	this->_pass = argv[2];
-	//parser _Pass
-	this->_fd = socket(AF_INET, SOCK_STREAM, 0); // Create a socket
-	if (this->_fd == -1)
+	_fd = socket(AF_INET, SOCK_STREAM, 0); // Create socket
+	if (_fd == -1)
 		throw std::runtime_error("socket() failed");
 
 	int opt = 1; // Set socket options
-	if (setsockopt(this->_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
+	if (setsockopt(_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
 		throw std::runtime_error("setsockopt() failed");
+}
 
+void Server::bindAndListen()
+{
 	sockaddr_in server_addr; // Bind the socket to an address and _port
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_addr.s_addr = INADDR_ANY;
-	server_addr.sin_port = htons(this->_port);
-	if (bind(this->_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1)
+	server_addr.sin_port = htons(_port);
+
+	if (bind(_fd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1)
 		throw std::runtime_error("bind() failed");
-		
-	if (listen(this->_fd, SOMAXCONN) == -1) // Listen for incoming connections
+
+	if (listen(_fd, SOMAXCONN) == -1) // Listen for incoming connections
 		throw std::runtime_error("listen() failed");
+}
 
-	this->_epollFd = epoll_create1(0); // Create an epoll instance
-	if (this->_epollFd == -1)
-		throw std::runtime_error("epoll_create1() failed");
+void Server::setupPoller()
+{
+	try {
+		_poller = createPoller();
+	} catch (const std::exception& e) {
+		throw std::runtime_error(std::string("Poller setup failed: ") + e.what());
+	}
+}
 
-	struct epoll_event event; // Add the server socket to the epoll instance
-	event.events = EPOLLIN;
-	event.data.fd = this->_fd;
-	if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, this->_fd, &event) == -1)
-		throw std::runtime_error("epoll_ctl() failed");
-	std::cout << "Server <" << this->_fd << "> listening on _port " << _port << "\n";
-	std::cout << "key is : " << _pass << "\n";
-	initCommandMap();
+void Server::addServerSocketToPoller()
+{
+	if (!_poller->add(_fd))
+		throw std::runtime_error("Poller::add() failed for server socket");
 }
 
 void Server::initCommandMap()
 {
-	_CommandMap["CAP"] = new CommandCap();
-	_CommandMap["NICK"] = new CommandNick();
-	_CommandMap["USER"] = new CommandUser();
-	_CommandMap["MODE"] = new CommandMode();
-	_CommandMap["JOIN"] = new CommandJoin();
-	_CommandMap["PASS"] = new CommandPass();
-	_CommandMap["PING"] = new CommandPing();
-	_CommandMap["PRIVMSG"] = new CommandPrivMsg();
-	_CommandMap["TOPIC"] = new CommandTopic();
-	_CommandMap["PART"] = new CommandPart();
-	_CommandMap["INVITE"] = new CommandInvite();
-	_CommandMap["KICK"] = new CommandKick();
+	_commandMap["CAP"] = new CommandCap();
+	_commandMap["NICK"] = new CommandNick();
+	_commandMap["USER"] = new CommandUser();
+	_commandMap["MODE"] = new CommandMode();
+	_commandMap["JOIN"] = new CommandJoin();
+	_commandMap["PASS"] = new CommandPass();
+	_commandMap["PING"] = new CommandPing();
+	_commandMap["PRIVMSG"] = new CommandPrivMsg();
+	_commandMap["TOPIC"] = new CommandTopic();
+	_commandMap["PART"] = new CommandPart();
+	_commandMap["INVITE"] = new CommandInvite();
+	_commandMap["KICK"] = new CommandKick();
 }
 
 // Closing functions
-void Server::shutdown() { _live = false; }
+void Server::shutdown() { _running = false; }
 
 void Server::closeFds()
 {
@@ -140,68 +120,86 @@ void Server::closeFds()
 
 // Server getters/setters
 
-const std::string &Server::get_serverName() const { return (_serverName); }
-bool Server::is_live () const { return (_live); }
-const std::string &Server::get_pass() const { return (_pass); }
-const std::map<std::string, Command*> &Server::get_CommandMap() const { return (_CommandMap); }
+const std::string &Server::get_host() const { return (_host); }
+bool Server::is_running () const { return (_running); }
+const std::string &Server::get_password() const { return (_password); }
+const std::map<std::string, Command*> &Server::get_CommandMap() const { return (_commandMap); }
 
 // Server data handling
 
 void Server::monitor()
 {
-	struct epoll_event events[42];
-	int event_count = epoll_wait(this->_epollFd, events, 10, -1); // check values
-	if (event_count == -1)
+	PollEvent events[42];
+	int eventCount = _poller->wait(events, 42, -1);
+
+	if (eventCount == -1 && is_running())
+		throw std::runtime_error("Poller::wait() failed");
+
+	for (int i = 0; i < eventCount; ++i)
+		handlePollEvent(events[i]);
+}
+
+void Server::handlePollEvent(const PollEvent& event)
+{
+	if (event.readable)
 	{
-		if (is_live())
-		throw std::runtime_error("epoll_wait() failed");
+		if (event.fd == _fd)
+			acceptNewClient();
+		else
+			handleDataClient(event.fd);
 	}
-	for (int i = 0; i < event_count; i++)
+	else if (event.error)
 	{
-		if (events[i].events & EPOLLIN)
-		{
-			if (events[i].data.fd == this->_fd)
-				acceptNewClient();
-			else
-				handleDataClient(events[i]);			
-		}
-		else if (events[i].events & (EPOLLERR | EPOLLHUP))
-		{
-			std::cerr << "Epoll error on fd: " << events[i].data.fd << std::endl;
-			// unsubscribe(((MainSocket *)events[i].data.ptr)->get_fd());
-			removeClient(events[i].data.fd);
-		}
+		std::cerr << "Poll error on fd: " << event.fd << std::endl;
+		removeClient(event.fd);
 	}
 }
 
 void Server::acceptNewClient()
 {	
-	std::memset(&_cliadd, 0, sizeof(_cliadd)); // Initialize client address structure to zero
-	socklen_t len = sizeof(_cliadd); // Store the size of the client address structure
-	int fdClient = accept(_fd, (sockaddr *)&(_cliadd), &len); // accept() extracts the 1st connection request from the pending queue, creating a new socket
-	if (fdClient == -1)
-	{ std::cout << "accept() failed" << std::endl; return; }
-	if (fcntl(fdClient, F_SETFL, O_NONBLOCK) == -1) // fcntl() edits the fd and sets the new socket to non-blocking mode
-	{ std::cout << "fcntl() failed" << std::endl; return; }
-	struct epoll_event event;
-	event.events = EPOLLIN; // Set the event type for epoll(). EPOLLIN: The client socket is ready for reading
-	event.data.fd = fdClient;
-	if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, fdClient, &event) == -1) // Add the client socket to the epoll instance
+	int clientFd = acceptSocketClient();
+	if (clientFd == -1)
+		return;
+
+	// fcntl() edits the fd and sets the new socket to non-blocking mode
+	if (fcntl(clientFd, F_SETFL, O_NONBLOCK) == -1)
 	{
-		std::cout << "epoll_ctl() failed" << std::endl;
-		close(fdClient);
+		std::cout << "fcntl() failed" << std::endl;
+		close(clientFd);
 		return;
 	}
-	std::string ip = inet_ntoa(_cliadd.sin_addr);
-	int _port = ntohs(_cliadd.sin_port);
-	Client* clientObject = new Client(fdClient, ip, _port);
-	_clientVec.push_back(clientObject); // Add the new client to the list of connected clients
-	std::cout << "Client <" << fdClient << "> Connected" << std::endl;
+
+	if (!_poller->add(clientFd)) // add client fd to Poller
+	{
+		close(clientFd);
+		return;
+	}
+
+	createAndStoreClient(clientFd);
 }
 
-void Server::handleDataClient(const epoll_event &event)
+int Server::acceptSocketClient()
 {
-	int fd = event.data.fd;
+	std::memset(&_cliadd, 0, sizeof(_cliadd)); // Initialize client address structure to zero
+	socklen_t len = sizeof(_cliadd); // Store the size of the client address structure
+	int clientFd = accept(_fd, (sockaddr*)&_cliadd, &len); 
+	// accept() extracts the 1st connection request from the pending queue, creating a new socket
+	if (clientFd == -1)
+		std::cout << "accept() failed" << std::endl;
+	return clientFd;
+}
+
+void Server::createAndStoreClient(int clientFd)
+{
+	std::string ip = inet_ntoa(_cliadd.sin_addr);
+	int port = ntohs(_cliadd.sin_port);
+	Client* clientObject = new Client(clientFd, ip, port);
+	_clientVec.push_back(clientObject);
+	std::cout << "Client <" << clientFd << "> Connected" << std::endl;
+}
+
+void Server::handleDataClient(int fd)
+{
 	for (size_t j = 0; j < _clientVec.size(); ++j)
 	{
 		if (_clientVec[j]->get_fd() == fd) {
@@ -225,6 +223,7 @@ void Server::removeClient(int fd)
 	{
 		if (this->_clientVec[i]->get_fd() == fd)
 		{
+			delete _clientVec[i];
 			this->_clientVec.erase(this->_clientVec.begin() + i);
 			return;
 		}

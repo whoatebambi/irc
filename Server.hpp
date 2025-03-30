@@ -2,6 +2,10 @@
 
 #include "Client.hpp"
 #include "Reply.hpp"
+#include "PollerFactory.hpp"
+#include "Poller.hpp"
+#include "EpollPoller.hpp"
+#include "PollPoller.hpp"
 
 #include "Command.hpp"
 #include "CommandCap.hpp"
@@ -23,7 +27,6 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <sys/epoll.h>
 #include <vector>
 #include <arpa/inet.h> 
 #include <csignal>
@@ -39,61 +42,53 @@
 #define INVERSE_BG "\033[7;49m"
 #define BOLD "\033[1m"
 
-class Command;
-class CommandCap;
-class CommandNick;
-class CommandUser;
-class CommandMode;
-class CommandJoin;
-class CommandPass;
-class CommandPing;
-class CommandTopic;
-class CommandPart;
-class CommandInvite;
-class CommandKick;
-
 class Client;
 class Channel;
 
 class Server
 {
 	private:
+		Poller* _poller;
 		int			_fd;
-		std::string	_serverName;
-		bool		_live; // need static?
+		std::string	_host;
+		bool		_running; // need static?
 		int			_port;
-		std::string _pass;
-		std::map<std::string, Command*>	_CommandMap;
+		std::string _password;
+		std::map<std::string, Command*>	_commandMap;
 	
 		struct sockaddr_in	_cliadd;
-		int					_epollFd;
 		std::vector<Client*>	_clientVec;
 		std::set<Channel*>		_channelSet;
 
 	public:
-		Server();
-		~Server();
-
 		// Initialize the server
-		static	Server &getInstance();
-		void	init(); // still needed?
-		void	init(char **argv);
+		Server();
+		static Server	&getInstance();
+		void	init(std::string port, std::string password);
+		void	createServerSocket();
+		void	bindAndListen();
+		void	setupPoller();
+		void	addServerSocketToPoller();
 		void	initCommandMap();
-
+		
 		// Closing functions
+		~Server();
 		void	shutdown();
 		void	closeFds();
 
 		// Server getters/setters
-		const std::string	&get_serverName() const;
-		bool				is_live() const;
-		const std::string	&get_pass() const;
+		const std::string	&get_host() const;
+		bool				is_running() const;
+		const std::string	&get_password() const;
 		const std::map<std::string, Command*> &get_CommandMap() const;
 
 		// Server data handling
 		void	monitor();
+		void	handlePollEvent(const PollEvent& event);
 		void	acceptNewClient();
-		void	handleDataClient(const epoll_event &event);
+		int		acceptSocketClient();
+		void	createAndStoreClient(int clientFd);
+		void	handleDataClient(int fd);
 		void	addChannel(Client *client, std::string name, std::string key);
 		void	removeClient(int fd);
 		
