@@ -20,6 +20,7 @@
 #include "CommandPart.hpp"
 #include "CommandInvite.hpp"
 #include "CommandKick.hpp"
+#include "CommandQuit.hpp"
 
 #include <iostream>
 #include <cstring>
@@ -89,6 +90,7 @@ class Server
 		int		acceptSocketClient();
 		void	createAndStoreClient(int clientFd);
 		void	handleDataClient(int fd);
+		std::set<int> getSharedChans(Client *client);
 		void	addChannel(Client *client, std::string name, std::string key);
 		void	removeClient(int fd);
 		

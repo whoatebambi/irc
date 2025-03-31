@@ -100,6 +100,7 @@ void Server::initCommandMap()
 	_commandMap["PART"] = new CommandPart();
 	_commandMap["INVITE"] = new CommandInvite();
 	_commandMap["KICK"] = new CommandKick();
+	_commandMap["QUIT"] = new CommandQuit();
 }
 
 // Closing functions
@@ -281,6 +282,26 @@ Client *Server::get_client(const std::string &nickname)
 		if (_clientVec[i]->get_nickname() == nickname)
 			return (_clientVec[i]);
 	return (NULL);
+}
+
+std::set<int> Server::getSharedChans(Client *client)
+{
+    std::set<int> list;
+    for (std::set<Channel *>::const_iterator it = this->_channelSet.begin(); it != _channelSet.end(); ++it)
+    {
+		if (client->isInList((*it)->get_memberSet()))
+        {
+			std::set<int> members;
+			for (std::set<Client*>::iterator memberIt = (*it)->get_memberSet().begin(); memberIt != (*it)->get_memberSet().end(); ++memberIt)
+			{
+				members.insert((*memberIt)->get_fd());
+			}
+            list.insert(members.begin(), members.end());
+        }
+    }
+	if (this->_channelSet.empty() || list.empty())
+		list.insert(client->get_fd());
+    return list;
 }
 
 const std::vector<Client*>	&Server::get_clientVec() const { return _clientVec; }

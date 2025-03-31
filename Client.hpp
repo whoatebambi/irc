@@ -44,6 +44,7 @@ class Client
 		bool 		get_isAuth() const;
 		void		set_isRegistered();
 		bool		get_isRegistered() const;
+		std::string get_source() const;
 		std::string	get_nickname() const;
 		void		set_nickname(const std::string &nickname);
 		std::string	get_username() const;

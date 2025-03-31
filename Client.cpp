@@ -1,10 +1,9 @@
 #include "Client.hpp"
 
 Client::Client(int fd, std::string hostname, int port)
-	: _fd(fd),
-	_hostname(hostname),
-	_port(port)
+	: _fd(fd), _hostname(hostname) 
 {
+	_port = port;
 	_isAuth = false;
 	_nickname = "";
 	_username = "";
@@ -94,3 +93,10 @@ std::string	Client::get_username() const { return _username; }
 void		Client::set_username(const std::string &username) { _username = username; }
 std::string	Client::get_realname() const { return _realname; }
 void		Client::set_realname(const std::string &realname) { _realname = realname; }
+std::string Client::get_source() const {
+	
+	std::cout << "SOURCE1 hostname :" << _hostname << std::endl;
+	std::string source = ":" + _nickname + "!" + _username + "@" + _hostname;
+	std::cout << "SOURCE2" << source << std::endl;
+	return source;
+}
