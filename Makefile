@@ -6,10 +6,10 @@ CC			=	c++
 FLAG		=	-Wall -Wextra -Werror -std=c++98 -Ipoll
 
 # Settings for florencecousergue macOS
- ifeq ($(UNAME_S), Darwin)
- CC			=	/opt/homebrew/Cellar/gcc/14.2.0_1/bin/g++-14
- FLAG		=	-Wall -Wextra -Werror -std=c++98 -I/usr/local/include -L/usr/local/lib -Ipoll
- endif
+ifeq ($(UNAME_S), Darwin)
+CC			=	/opt/homebrew/Cellar/gcc/14.2.0_1/bin/g++-14
+FLAG		=	-Wall -Wextra -Werror -std=c++98 -I/usr/local/include -L/usr/local/lib -Ipoll
+endif
 
 C_FILES		=	main.cpp Client.cpp Server.cpp Channel.cpp Command.cpp Reply.cpp \
 				poll/PollPoller.cpp poll/PollerFactory.cpp \
@@ -53,14 +53,5 @@ re:	fclean all
 
 .PHONY:	all clean fclean re
 
-
-# === Test poller binary ===
-
-# TEST_NAME = test_poller
-# TEST_SRC = test_poller.cpp poll/PollerFactory.cpp poll/PollPoller.cpp poll/EpollPoller.cpp
-# TEST_OBJS = $(addprefix $(OBJ_DIR)/, $(TEST_SRC:.cpp=.o))
-
-# $(TEST_NAME): $(TEST_OBJS)
-# 	$(CC) $(FLAG) $(TEST_OBJS) -o $(TEST_NAME)
-
-# test: $(TEST_NAME)
+asan:
+	clang++ -fsanitize=address -std=c++98 -g $(C_FILES) -o $(NAME)

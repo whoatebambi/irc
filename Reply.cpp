@@ -12,7 +12,7 @@ void Reply::sendBroadcast(std::set<int> fds, Client* sender, std::string msg)
 	std::string msgFull = sender->get_mask() + " " + msg + "\r\n";
 	for (std::set<int>::const_iterator it = fds.begin(); it != fds.end(); ++it)
 	{
-		std::cout << INVERSE_BG << RED << ">>> " << BOLD << "server->FD<" << *it << "> " << msgFull << RESET ;
+		std::cout << INVERSE_BG << RED << ">>> " << BOLD << " to fd<" << *it << "> " << msgFull << RESET ;
 		send(*it, msgFull.c_str(), msgFull.size(), MSG_NOSIGNAL);
 	}
 }
@@ -90,7 +90,7 @@ void Reply::sendNumReply(Client *client, int numericCode) // sendError
 	msg << ":" << Server::getInstance().get_serverName() << " " << numericCode << " " << client->get_nickname();
 	msg << getErrorMessage(numericCode) << "\r\n";
 
-	std::cout << INVERSE_BG << RED << ">>> " << BOLD << msg.str() << RESET << std::endl;
+	std::cout << INVERSE_BG << RED << ">>> " << BOLD << msg.str() << RESET;
 	send(client->get_fd(), msg.str().c_str(), msg.str().size(), MSG_NOSIGNAL);
 }
 
@@ -105,7 +105,7 @@ void Reply::sendNumReply(Client *client, int numericCode, const std::string &str
 		msg << " " << str1;
 	msg << getErrorMessage(numericCode) << "\r\n";
 
-	std::cout << INVERSE_BG << RED << ">>> " << BOLD << msg.str() << RESET << std::endl;
+	std::cout << INVERSE_BG << RED << ">>> " << BOLD << msg.str() << RESET;
 	send(client->get_fd(), msg.str().c_str(), msg.str().size(), MSG_NOSIGNAL);
 }
 
@@ -122,6 +122,6 @@ void Reply::sendNumReply(Client *client, int numericCode, const std::string &str
 		msg << " " << str2;
 	msg << getErrorMessage(numericCode) << "\r\n";
 
-	std::cout << INVERSE_BG << RED << ">>> " << BOLD << msg.str() << RESET << std::endl;
+	std::cout << INVERSE_BG << RED << ">>> " << BOLD << msg.str() << RESET;
 	send(client->get_fd(), msg.str().c_str(), msg.str().size(), MSG_NOSIGNAL);
 }

@@ -1,9 +1,9 @@
 #include "CommandKick.hpp"
 
 static bool	canKick(Channel *channel, Client *client, Client *toKick, const std::string &channelName);
-static void		performKick(Channel *channel, Client *client, Client *toKick, const std::string &kickMsg);
+static void	performKick(Channel *channel, Client *client, Client *toKick, const std::string &kickMsg);
 
-void CommandKick::execute(const std::string &args, Client *client)
+void	CommandKick::execute(const std::string &args, Client *client)
 {
 	// std::cout << INVERSE_BG << BLUE << "KICK args: " BOLD << args << RESET << std::endl;
 	std::vector<std::string> argVec = splitArgs(args);
@@ -41,14 +41,14 @@ bool	canKick(Channel *channel, Client *client, Client *toKick, const std::string
 	return (true);
 }
 
-void performKick(Channel *channel, Client *client, Client *toKick, const std::string &kickMsg)
+void	performKick(Channel *channel, Client *client, Client *toKick, const std::string &kickMsg)
 {
 	std::string msg = "KICK " + channel->get_name() + " " + toKick->get_nickname();
 	if (!kickMsg.empty())
 		msg += " :" + kickMsg;
 	Reply::sendBroadcast(channel->generateMembersFd(), client, msg);
-	Server::getInstance().removeClient(toKick->get_fd());
-	// channel->removeMember(toKick);
-	// channel->removeInvite(toKick);
-	// channel->removeOperator(toKick);
+	channel->removeMember(toKick);
+	channel->removeOperator(toKick);
+	channel->removeInvite(toKick);
+	Reply::sendNumReply(toKick, ERR_NOTONCHANNEL, channel->get_name()); // Test if ERR_NOTONCHANNELcloses the channel UI of the kicked user
 }

@@ -1,14 +1,6 @@
 #include "Client.hpp"
 
-Client::Client(int fd, std::string hostname, int port)
-	: _fd(fd), _hostname(hostname) 
-{
-	_port = port;
-	_isAuth = false;
-	_nickname = "";
-	_username = "";
-	_realname = "";
-}
+Client::Client(int fd, std::string host, int port) : _fd(fd), _host(host), _port(port), _isAuth(false) {}
 
 Client::~Client() {}
 
@@ -22,14 +14,15 @@ void	Client::parseDataClient()
 		_saved.clear();
 	}
 
-	char buffer[1024];
+	char buffer[BUFFER_SIZE];
 	memset(buffer, 0, sizeof(buffer));
 	ssize_t bytes = recv(_fd, buffer, sizeof(buffer) - 1 , 0);
 	line += buffer;
 	if (line.empty() || bytes == -1)
 	{
-		return Server::getInstance().removeClient(_fd);
 		std::cout << "Client <" << _fd << "> Disconnected" << std::endl;
+		Server::getInstance().removeClient(_fd);
+		return;
 	}
 	
 	// check if in list
@@ -76,27 +69,27 @@ std::string Client::ft_trim(const std::string &str)
 }
 
 // remove if possible
-bool Client::isInList(const std::set<Client*> &list) const { return list.find(const_cast<Client*>(this)) != list.end();; }
 
-const std::string	&Client::get_hostname() const { return _hostname; };
-std::string	Client::get_nickname() const { return _nickname; }
-void		Client::set_nickname(const std::string &nickname) { _nickname = nickname; }
-std::string	Client::get_mask() const { return _mask; }
-void		Client::set_mask() { _mask = ":" + _nickname + "!" + _username + "@" + _hostname; }
+const std::string	&Client::get_host() const { return _host; };
+const std::string	&Client::get_nickname() const { return _nickname; }
+void				Client::set_nickname(const std::string &nickname) { _nickname = nickname; }
+const std::string	&Client::get_mask() const { return _mask; }
+void				Client::set_mask() { _mask = ":" + _nickname + "!" + _username + "@" + _host; }
 bool		Client::get_isAuth() const { return _isAuth; }
 void		Client::set_isAuth() { _isAuth = true;}
 bool		Client::get_isRegistered() const { return _isRegistered; }
 void		Client::set_isRegistered() { _isRegistered = true; }
+void		Client::set_isDead() { _isDead = true; }
+bool		Client::get_isDead() const { return _isDead; }
 int			Client::get_fd() const { return _fd; }
-std::string	Client::get_saved() const {return _saved; }
-std::string	Client::get_username() const { return _username; }
-void		Client::set_username(const std::string &username) { _username = username; }
-std::string	Client::get_realname() const { return _realname; }
-void		Client::set_realname(const std::string &realname) { _realname = realname; }
+const std::string	&Client::get_username() const { return _username; }
+void				Client::set_username(const std::string &username) { _username = username; }
+const std::string	&Client::get_realname() const { return _realname; }
+void				Client::set_realname(const std::string &realname) { _realname = realname; }
 std::string Client::get_source() const {
 	
-	std::cout << "SOURCE1 hostname :" << _hostname << std::endl;
-	std::string source = ":" + _nickname + "!" + _username + "@" + _hostname;
+	std::cout << "SOURCE1 hostname :" << _host << std::endl;
+	std::string source = ":" + _nickname + "!" + _username + "@" + _host;
 	std::cout << "SOURCE2" << source << std::endl;
 	return source;
 }

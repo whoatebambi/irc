@@ -42,7 +42,7 @@ void	handleChannelMsg(const std::string &target, const std::string &msgArg, Clie
 	if (!channel)
 		return (Reply::sendNumReply(client, ERR_NOSUCHCHANNEL, target));
 
-	if (!client->isInList(channel->get_memberSet()))
+	if (!channel->isInChannel(client))
 		return (Reply::sendNumReply(client, ERR_CANNOTSENDTOCHAN, target));
 
 	std::set<int> fdSet = channel->generateMembersFd();

@@ -48,7 +48,7 @@ static void	replyCurrentTopic(Channel *channel, Client *client)
 	if (channel->get_topic().empty())
 		Reply::sendNumReply(client, RPL_NOTOPIC, channel->get_name());
 	else
-		Reply::sendNumReply(client, RPL_TOPIC, channel->get_name(), channel->get_topic());
+		Reply::sendNumReply(client, RPL_TOPIC, channel->get_name(), ":" + channel->get_topic());
 }
 
 static bool	canChangeTopic(Channel *channel, Client *client)

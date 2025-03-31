@@ -30,9 +30,6 @@ void CommandJoin::execute(const std::string &args, Client *client)
         if (it2 == channelSet.end())      
 			Server::getInstance().addChannel(client, it->first, it->second);
     }
-	// •	Add the user to the channel’s member list.
-	// •	Update the channel’s user count.
-	// •	If this is the first user, they become the operator (+o).
 }
 
 std::map<std::string, std::string> CommandJoin::parseArgs(const std::string &args, Client *client)

@@ -7,16 +7,20 @@ Server::~Server()
 	closeFds();
 	close(_fd);
 
-	for (std::vector<Client*>::iterator it = _clientVec.begin(); it != _clientVec.end(); ++it)
-		delete (*it);
+	for (size_t i = 0; i < _clientVec.size(); ++i)
+    	delete _clientVec[i];
 	_clientVec.clear();
 
-	for (std::set<Channel*>::iterator it = _channelSet.begin(); it != _channelSet.end(); ++it)
-		delete (*it);
-	_channelSet.clear();
+	std::vector<Channel*> channelsToDelete(_channelSet.begin(), _channelSet.end());
+	for (size_t i = 0; i < channelsToDelete.size(); ++i)
+		removeChannel(channelsToDelete[i]);
+	_channelSet.clear(); // not strictly needed, but safe to keep
 
-	for (std::map<std::string, Command*>::iterator it = _commandMap.begin(); it != _commandMap.end(); ++it)
-		delete it->second;
+	for (std::map<std::string, Command*>::iterator it = _commandMap.begin(); it != _commandMap.end(); )
+	{
+		delete (it->second);
+		_commandMap.erase(it++); // increment *after* erasing
+	}
 	_commandMap.clear();
 	delete _poller;
 }
@@ -29,10 +33,12 @@ Server &Server::getInstance()
 	return (instance);
 }
 
-void Server::init(std::string port, std::string password)
+void Server::init(const std::string &port, const std::string &password)
 {
 	_running = true;
 	_port = atoi(port.c_str());
+	if (_port < MIN_PORT || _port > MAX_PORT)
+		throw std::runtime_error("Invalid port: must be between 1024 and 65535");
 	_password = password;
 
 	createServerSocket();
@@ -193,9 +199,9 @@ int Server::acceptSocketClient()
 
 void Server::createAndStoreClient(int clientFd)
 {
-	std::string hostname = inet_ntoa(_cliadd.sin_addr);
+	std::string host = inet_ntoa(_cliadd.sin_addr);
 	int port = ntohs(_cliadd.sin_port);
-	Client* clientObject = new Client(clientFd, hostname, port);
+	Client* clientObject = new Client(clientFd, host, port);
 	_clientVec.push_back(clientObject);
 	std::cout << "Client <" << clientFd << "> Connected" << std::endl;
 }
@@ -204,14 +210,17 @@ void Server::handleDataClient(int fd)
 {
 	for (size_t j = 0; j < _clientVec.size(); ++j)
 	{
-		if (_clientVec[j]->get_fd() == fd) {
+		if (_clientVec[j]->get_fd() == fd)
+		{
 			_clientVec[j]->parseDataClient();
+			if (_clientVec[j]->get_isDead())
+				Server::getInstance().removeClient(_clientVec[j]->get_fd());
 			break;
 		}
 	}
 }
 
-void Server::addChannel(Client *client, std::string name, std::string key)
+void Server::addChannel(Client *client, const std::string &name, const std::string &key)
 {
 	Channel *channel = new Channel(client, name, key);
 	_channelSet.insert(channel);
@@ -219,18 +228,13 @@ void Server::addChannel(Client *client, std::string name, std::string key)
 	channel->joinChannel(client, key);
 }
 
-// void Server::removeClient(int fd)
-// {
-// 	for (size_t i = 0; i < this->_clientVec.size(); i++)
-// 	{
-// 		if (this->_clientVec[i]->get_fd() == fd)
-// 		{
-// 			delete _clientVec[i];
-// 			this->_clientVec.erase(this->_clientVec.begin() + i);
-// 			return;
-// 		}
-// 	}
-// }
+void Server::removeChannel(Channel *channel)
+{
+	std::cout << "Channel #" << channel->get_name() << " deleted.\n";
+	_channelSet.erase(channel); // remove pointer from Server's set
+	delete (channel); // this will destroy the channel and its _memberSet (but not the clients themselves)
+}
+
 void Server::removeClient(int fd)
 {
 	for (size_t i = 0; i < this->_clientVec.size(); ++i)
@@ -238,7 +242,7 @@ void Server::removeClient(int fd)
 		Client* client = this->_clientVec[i];
 		if (client->get_fd() == fd)
 		{
-			// 1. Remove client from all channels
+			std::cout << "Client <" << client->get_fd() << ">" << " deleted.\n";
 			for (std::set<Channel*>::iterator it = _channelSet.begin(); it != _channelSet.end(); )
 			{
 				Channel* channel = *it;
