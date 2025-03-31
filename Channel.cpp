@@ -20,8 +20,11 @@ void	Channel::joinChannel(Client *client, const std::string &key)
 	if (!canJoin(client, key))
 		return;
 	this->_memberSet.insert(client);
-	Reply::sendBroadcast(generateMembersFd(), client, " JOIN :" + get_name());
-	Reply::sendNumReply(client, RPL_TOPIC, get_topic());
+	Reply::sendBroadcast(generateMembersFd(), client, "JOIN :" + get_name());
+	if (get_topic().empty())
+		Reply::sendNumReply(client, RPL_NOTOPIC, _name);
+	else
+		Reply::sendNumReply(client, RPL_TOPIC, _name, ":" + get_topic());
 	Reply::sendNumReply(client, RPL_NAMREPLY, "= " + get_name() + generateMembersNick());
 	Reply::sendNumReply(client, RPL_ENDOFNAMES, get_name());
 }
@@ -69,7 +72,7 @@ std::string	Channel::generateMembersNick() const
 	std::string str;
 	for (std::set<Client*>::const_iterator it = _memberSet.begin(); it != _memberSet.end(); ++it)
 	{
-		str += " ";
+		str += " :";
 		if (isOperator(*it))
 			str += "@";
 		str += (*it)->get_nickname();

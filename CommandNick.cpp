@@ -6,10 +6,17 @@ void CommandNick::execute(const std::string &args, Client *client)
 	if (args.empty())
 		return (Reply::sendNumReply(client, ERR_NONICKNAMEGIVEN));
 
+	if (!client->get_isAuth())
+	{
+		client->set_isDead();
+		std::cout << "Client <" << client->get_fd() << "> flagged as DEAD during NICK" << std::endl;
+		return;
+	}
+
 	if (!isValidNick(args))
 		return (Reply::sendNumReply(client, ERR_ERRONEUSNICKNAME, args));
 
-	if (Server::getInstance().isClient(args)) // && client->get_nickname() != args
+	if (Server::getInstance().isClient(args) && client->get_nickname() == args) // to test
 		return Reply::sendNumReply(client, ERR_NICKNAMEINUSE, args);
 
 	std::string oldMask = client->get_mask();
@@ -35,7 +42,6 @@ void CommandNick::execute(const std::string &args, Client *client)
 		send(client->get_fd(), msg.c_str(), msg.size(), MSG_NOSIGNAL);
 		return;
 	}
-	// Reply::sendBroadcast(broadcastFds, client, msg);
 	for (std::set<int>::const_iterator it = broadcastFds.begin(); it != broadcastFds.end(); ++it)
 	{
 		std::cout << INVERSE_BG << RED << ">>> " << BOLD << "server->FD<" << *it << "> " << msg << RESET ;

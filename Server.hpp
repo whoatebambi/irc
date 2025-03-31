@@ -51,7 +51,7 @@ class Server
 		Poller* _poller;
 		int			_fd;
 		std::string	_serverName;
-		bool		_running; // need static?
+		bool		_running;
 		int			_port;
 		std::string _password;
 		std::map<std::string, Command*>	_commandMap;
@@ -60,11 +60,14 @@ class Server
 		std::vector<Client*>	_clientVec;
 		std::set<Channel*>		_channelSet;
 
+		static const int MIN_PORT = 1024;
+		static const int MAX_PORT = 65535;
+
 	public:
 		// Initialize the server
 		Server();
 		static Server	&getInstance();
-		void	init(std::string port, std::string password);
+		void	init(const std::string &port, const std::string &password);
 		void	createServerSocket();
 		void	bindAndListen();
 		void	setupPoller();
@@ -89,13 +92,14 @@ class Server
 		int		acceptSocketClient();
 		void	createAndStoreClient(int clientFd);
 		void	handleDataClient(int fd);
-		void	addChannel(Client *client, std::string name, std::string key);
+		void	addChannel(Client *client, const std::string &name, const std::string &key);
+		void	removeChannel(Channel *channel);
 		void	removeClient(int fd);
 		
 		// Clients and channels setters/getters
 		bool	isClient(const std::string &nickname) const;
 		bool	isRegisteredClient(const std::string &nickname) const;
-		Client	*get_client(std::string const &nickname);
+		Client	*get_client(const std::string &nickname);
 		const std::vector<Client*>	&get_clientVec() const;
 		const std::set<Channel*>	&get_channelSet() const;
 };
