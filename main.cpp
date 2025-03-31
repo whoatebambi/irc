@@ -22,7 +22,7 @@ int	main(int argc, char **argv)
 	try {
 		std::signal(SIGINT, handleSignal);
 		// Server::getInstance().init(argv[1], argv[2]);
-		Server::getInstance().init("4444", "1234");
+		Server::getInstance().init("6667", "1234");
 		while(Server::getInstance().is_running())
 			Server::getInstance().monitor();
 	}

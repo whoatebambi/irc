@@ -3,16 +3,14 @@
 void CommandPart::execute(const std::string &args, Client *client)
 {
 	// std::cout << INVERSE_BG << BLUE << "PART args: " BOLD << args << RESET << std::endl;
-	if (args.empty())
+	std::vector<std::string> argVec = splitArgs(args);
+	if (argVec.empty() || argVec.size() > 2)
 		return (Reply::sendNumReply(client, ERR_NEEDMOREPARAMS, "PART"));
-
-	std::vector<std::string> argsVector = splitArgs(args);
-	std::vector<std::string> channelVec = splitString(argsVector[0], ',');
+	
+	std::vector<std::string> channelVec = splitString(argVec[0], ',');
 	std::string partMsg;
-	if (argsVector.size() < 2)
-		return (Reply::sendNumReply(client, ERR_NEEDMOREPARAMS, "PART"));
-
-	partMsg = argsVector[1];
+	if (argVec.size() == 2)
+		partMsg = argVec[1];
 	if (!isValidPartMsg(partMsg))
 		partMsg = ""; // drop silently
 
@@ -40,6 +38,8 @@ void CommandPart::execute(const std::string &args, Client *client)
 			continue;
 		}
 		channel->partChannel(client, partMsg); // This should do the broadcasting + removal
+		if (channel->get_memberSet().size() == 0)
+			Server::getInstance().removeChannel(channel);
 	}
 }
 
