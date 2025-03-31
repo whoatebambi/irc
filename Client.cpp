@@ -86,10 +86,3 @@ const std::string	&Client::get_username() const { return _username; }
 void				Client::set_username(const std::string &username) { _username = username; }
 const std::string	&Client::get_realname() const { return _realname; }
 void				Client::set_realname(const std::string &realname) { _realname = realname; }
-std::string Client::get_source() const {
-	
-	std::cout << "SOURCE1 hostname :" << _host << std::endl;
-	std::string source = ":" + _nickname + "!" + _username + "@" + _host;
-	std::cout << "SOURCE2" << source << std::endl;
-	return source;
-}

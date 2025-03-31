@@ -37,7 +37,7 @@ class Client
 		void		parseDataClient();
 		void		executeCommand(std::string &line);
 		std::string	ft_trim(const std::string &str);
-
+		
 		int			get_fd() const;
 		const std::string	&get_host() const;
 		void 		set_isAuth();
@@ -46,7 +46,6 @@ class Client
 		bool		get_isRegistered() const;
 		void		set_isDead();
 		bool		get_isDead() const;
-		std::string get_source() const;
 		const std::string	&get_nickname() const;
 		void				set_nickname(const std::string &nickname);
 		const std::string	&get_username() const;

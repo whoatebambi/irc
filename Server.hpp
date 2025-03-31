@@ -93,7 +93,6 @@ class Server
 		int		acceptSocketClient();
 		void	createAndStoreClient(int clientFd);
 		void	handleDataClient(int fd);
-		std::set<int> getSharedChans(Client *client);
 		void	addChannel(Client *client, const std::string &name, const std::string &key);
 		void	removeChannel(Channel *channel);
 		void	removeClient(int fd);
@@ -102,6 +101,7 @@ class Server
 		bool	isClient(const std::string &nickname) const;
 		bool	isRegisteredClient(const std::string &nickname) const;
 		Client	*get_client(const std::string &nickname);
+		std::set<int>	getSharedMembersFd(Client *client);
 		const std::vector<Client*>	&get_clientVec() const;
 		const std::set<Channel*>	&get_channelSet() const;
 };
