@@ -20,6 +20,7 @@
 #include "CommandPart.hpp"
 #include "CommandInvite.hpp"
 #include "CommandKick.hpp"
+#include "CommandQuit.hpp"
 
 #include <iostream>
 #include <cstring>
@@ -100,6 +101,7 @@ class Server
 		bool	isClient(const std::string &nickname) const;
 		bool	isRegisteredClient(const std::string &nickname) const;
 		Client	*get_client(const std::string &nickname);
+		std::set<int>	getSharedMembersFd(Client *client);
 		const std::vector<Client*>	&get_clientVec() const;
 		const std::set<Channel*>	&get_channelSet() const;
 };

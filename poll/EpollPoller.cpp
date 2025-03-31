@@ -1,6 +1,7 @@
 #ifdef __linux__
 
 #include "EpollPoller.hpp"
+#include <cstdio> // For perror
 
 EpollPoller::EpollPoller()
 {

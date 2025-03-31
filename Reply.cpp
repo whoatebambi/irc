@@ -9,6 +9,7 @@ void Reply::sendReply(Client *client, std::string msg)
 
 void Reply::sendBroadcast(std::set<int> fds, Client* sender, std::string msg)
 {
+	// if fds NULL, return;
 	std::string msgFull = sender->get_mask() + " " + msg + "\r\n";
 	for (std::set<int>::const_iterator it = fds.begin(); it != fds.end(); ++it)
 	{

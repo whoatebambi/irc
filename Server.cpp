@@ -106,6 +106,7 @@ void Server::initCommandMap()
 	_commandMap["PART"] = new CommandPart();
 	_commandMap["INVITE"] = new CommandInvite();
 	_commandMap["KICK"] = new CommandKick();
+	_commandMap["QUIT"] = new CommandQuit();
 }
 
 // Closing functions
@@ -231,7 +232,7 @@ void Server::removeChannel(Channel *channel)
 {
 	std::cout << "Channel #" << channel->get_name() << " deleted.\n";
 	_channelSet.erase(channel); // remove pointer from Server's set
-	delete (channel); // this will destroy the channel and its _memberSet (but not the clients themselves)
+	delete (channel); // this will destroy the channel but not the clients in the lists)
 }
 
 void Server::removeClient(int fd)
@@ -241,17 +242,16 @@ void Server::removeClient(int fd)
 		Client* client = this->_clientVec[i];
 		if (client->get_fd() == fd)
 		{
-			std::cout << "Client <" << client->get_fd() << ">" << " deleted.\n";
-			for (std::set<Channel*>::iterator it = _channelSet.begin(); it != _channelSet.end(); )
+			for (std::set<Channel*>::iterator it = _channelSet.begin(); it != _channelSet.end(); ++it)
 			{
 				Channel* channel = *it;
 				channel->removeMember(client);
 				channel->removeInvite(client);
 				channel->removeOperator(client);
-				// Optionally delete empty channels
+				if (channel->get_memberSet().size() == 0)
+					removeChannel(channel);
 			}
-			// 2. Remove nickname if you track it (you probably should)
-			// e.g. _nickMap.erase(client->getNickname());
+			std::cout << "Client <" << client->get_fd() << ">" << " deleted.\n";
 			_poller->unregisterFd(fd);
 			close(fd);
 			delete (client);
@@ -285,6 +285,24 @@ Client *Server::get_client(const std::string &nickname)
 		if (_clientVec[i]->get_nickname() == nickname)
 			return (_clientVec[i]);
 	return (NULL);
+}
+
+std::set<int> Server::getSharedMembersFd(Client *client)
+{
+    std::set<int> list;
+    for (std::set<Channel *>::const_iterator it = this->_channelSet.begin(); it != _channelSet.end(); ++it)
+    {
+		if ((*it)->isInChannel(client))
+        {
+			std::set<int> memberFdSet;
+			for (std::set<Client*>::iterator it2 = (*it)->get_memberSet().begin(); it2 != (*it)->get_memberSet().end(); ++it2)
+				if ((*it2)->get_fd() != client->get_fd())
+					memberFdSet.insert((*it2)->get_fd());
+            list.insert(memberFdSet.begin(), memberFdSet.end());
+        }
+    }
+	// list.insert(client->get_fd());
+    return list;
 }
 
 const std::vector<Client*>	&Server::get_clientVec() const { return _clientVec; }
