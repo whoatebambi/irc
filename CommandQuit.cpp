@@ -12,7 +12,7 @@ void CommandQuit::execute(const std::string &args, Client *client)
 	
 	std::set<int> sharedMembersFd = Server::getInstance().getSharedMembersFd(client); // if NULL/
 	std::string msg = "QUIT :" + partMsg;
-	Server::getInstance().removeClient(client->get_fd());
+	// Server::getInstance().removeClient(client->get_fd());
 	Reply::sendBroadcast(sharedMembersFd, client, msg);
 	// client->set_isDead();
 	// check for leaks after this step

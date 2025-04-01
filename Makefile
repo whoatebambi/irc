@@ -42,7 +42,6 @@ $(NAME):	$(OBJS)
 clean:
 	rm -f $(OBJ_DIR)/*.o $(DEPS)
 	rm -rf $(OBJ_DIR)
-# rm -f $(TEST_NAME)
 
 fclean:	clean
 	rm -f $(NAME)
