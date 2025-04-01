@@ -8,7 +8,10 @@ Server::~Server()
 	close(_fd);
 
 	for (size_t i = 0; i < _clientVec.size(); ++i)
+	{
+		// removeClient(_clientVec[i]->get_fd());
     	delete _clientVec[i];
+	}
 	_clientVec.clear();
 
 	std::vector<Channel*> channelsToDelete(_channelSet.begin(), _channelSet.end());
@@ -210,11 +213,14 @@ void Server::handleDataClient(int fd)
 {
 	for (size_t j = 0; j < _clientVec.size(); ++j)
 	{
+		// if (_clientVec[j] == NULL)
+		// 	continue;
 		if (_clientVec[j]->get_fd() == fd)
 		{
 			_clientVec[j]->parseDataClient();
-			if (_clientVec[j]->get_isDead())
-				Server::getInstance().removeClient(_clientVec[j]->get_fd());
+			// if (_clientVec[j]->get_isDead() == true)
+			// 	std::cout << "_clientVec[j]->get_isDead() == true" << std::endl;
+			// 	Server::getInstance().removeClient(_clientVec[j]->get_fd());
 			break;
 		}
 	}
@@ -245,11 +251,13 @@ void Server::removeClient(int fd)
 			for (std::set<Channel*>::iterator it = _channelSet.begin(); it != _channelSet.end(); ++it)
 			{
 				Channel* channel = *it;
+				if ((*it) == NULL)
+					continue;
 				channel->removeMember(client);
 				channel->removeInvite(client);
 				channel->removeOperator(client);
-				if (channel->get_memberSet().size() == 0)
-					removeChannel(channel);
+				// if (channel->get_memberSet().size() == 0)
+				// 	removeChannel(channel);
 			}
 			std::cout << "Client <" << client->get_fd() << ">" << " deleted.\n";
 			_poller->unregisterFd(fd);

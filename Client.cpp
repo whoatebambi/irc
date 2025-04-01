@@ -1,6 +1,6 @@
 #include "Client.hpp"
 
-Client::Client(int fd, std::string host, int port) : _fd(fd), _host(host), _port(port), _isAuth(false) {}
+Client::Client(int fd, std::string host, int port) : _fd(fd), _host(host), _port(port), _isAuth(false), _isDead(false) {}
 
 Client::~Client() {}
 
