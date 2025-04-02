@@ -18,10 +18,9 @@ class Client
 	private:
 		int			_fd;
 		std::string	_host;
-		int			_port;
 		std::string	_saved;
 		bool 		_isAuth;
-		bool 		_isRegistered; // after PASS, NICK, USER commands
+		// bool 		_isRegistered; // after PASS, NICK, USER commands, check if useful
 		bool		_isDead;
 		std::string	_nickname;
 		std::string	_username;
@@ -31,7 +30,7 @@ class Client
 		static const int BUFFER_SIZE = 512;
 
 	public:
-		Client(int fd, std::string host, int port);
+		Client(int fd, std::string host);
 		~Client();
 
 		void		parseDataClient();
@@ -42,8 +41,8 @@ class Client
 		const std::string	&get_host() const;
 		void 		set_isAuth();
 		bool 		get_isAuth() const;
-		void		set_isRegistered();
-		bool		get_isRegistered() const;
+		// void		set_isRegistered();
+		// bool		get_isRegistered() const;
 		void		set_isDead();
 		bool		get_isDead() const;
 		const std::string	&get_nickname() const;

@@ -81,11 +81,22 @@ void CommandMode::applyModes(Channel* channel, Client *client, const std::vector
 
 void CommandMode::handleMode_i(CommandContext &ctx)
 {
-	ctx.channel->set_inviteOnly(ctx.adding);
 	if (ctx.adding)
+	{
+		ctx.channel->set_inviteOnly(true);
 		ctx.modes += "+i";
+		std::set<Client*> const	&memberSet = ctx.channel->get_memberSet();
+		for (std::set<Client*>::const_iterator it = memberSet.begin(); it != memberSet.end(); ++it)
+			ctx.channel->addInvite(*it);
+	}
 	else
+	{
 		ctx.modes += "-i";
+		ctx.channel->set_inviteOnly(false);
+		std::set<Client*> const	&memberSet = ctx.channel->get_memberSet();
+		for (std::set<Client*>::const_iterator it = memberSet.begin(); it != memberSet.end(); ++it)
+			ctx.channel->removeInvite(*it);
+	}
 }
 
 void CommandMode::handleMode_t(CommandContext &ctx)

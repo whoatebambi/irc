@@ -84,23 +84,13 @@
 #define ERR_USERSDONTMATCH		502 // ✅ ":Cant change mode for other users"
 
 //////////// PRIVMSG replies & errors:
-#define RPL_AWAY				301 // ✅ "<nick> :<away message>"
+// #define RPL_AWAY				301 // ✅ "<nick> :<away message>"
 #define ERR_NOSUCHNICK			401 // ✅ "<nickname> :No such nick/channel"
 #define ERR_NOSUCHCHANNEL		403	// ✅ "<channel name> :No such channel"
-#define ERR_CANNOTSENDTOCHAN	404 // "<channel name> :Cannot send to channel"
-#define ERR_TOOMANYTARGETS		407 // "<target> :Duplicate recipients. No message delivered."
-#define ERR_NORECIPIENT			411 // ":No recipient given (<command>)"
-#define ERR_NOTEXTTOSEND		412 // ":No text to send"
-#define ERR_NEEDMOREPARAMS		461	// "<command> :Not enough parameters"
-
-//////////// QUIT replies & errors:
-// none
-
-//////////// WHO replies & errors:
-#define RPL_WHOREPLY			352 // "<client> <channel> <username> <host> <server> <nick> <flags> :<hopcount> <realname>"
-#define RPL_ENDOFWHO			315 // "<name> :End of /WHO list"
-
-// optional: USERS to show users, NAMES to show @ ops, LIST channels and topics, OPER
+#define ERR_CANNOTSENDTOCHAN	404 // ✅ "<channel name> :Cannot send to channel"
+#define ERR_NORECIPIENT			411 // ✅ ":No recipient given (<command>)"
+#define ERR_NOTEXTTOSEND		412 // ✅ ":No text to send"
+#define ERR_NEEDMOREPARAMS		461	// ✅ "<command> :Not enough parameters"
 
 
 #define INVERSE "\033[7m"

@@ -9,7 +9,6 @@ void Reply::sendReply(Client *client, std::string msg)
 
 void Reply::sendBroadcast(std::set<int> fds, Client* sender, std::string msg)
 {
-	// if fds NULL, return;
 	std::string msgFull = sender->get_mask() + " " + msg + "\r\n";
 	for (std::set<int>::const_iterator it = fds.begin(); it != fds.end(); ++it)
 	{
@@ -53,7 +52,6 @@ void  Reply::initReplies()
 
 	//////////// PRIVMSG replies & errors:
 	replies.insert(std::make_pair(ERR_CANNOTSENDTOCHAN, "Cannot send to channel"));
-	replies.insert(std::make_pair(ERR_TOOMANYTARGETS, "Duplicate recipients. No message delivered."));
 	replies.insert(std::make_pair(ERR_NORECIPIENT, "No recipient given ")); // ":No recipient given (<command>)"
 	replies.insert(std::make_pair(ERR_NOTEXTTOSEND, "No text to send"));
 
@@ -67,9 +65,6 @@ void  Reply::initReplies()
 
 	//////////// KICK replies & errors:
 	replies.insert(std::make_pair(ERR_USERNOTINCHANNEL, "They aren't on that channel"));
-
-	//////////// WHO replies & errors:
-	replies.insert(std::make_pair(RPL_ENDOFWHO, "End of /WHO list"));
 }
 
 // Get error message from map

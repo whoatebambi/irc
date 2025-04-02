@@ -1,6 +1,7 @@
 #include "Client.hpp"
 
-Client::Client(int fd, std::string host, int port) : _fd(fd), _host(host), _port(port), _isAuth(false), _isDead(false) {}
+Client::Client(int fd, std::string host)
+	: _fd(fd), _host(host), _saved(""), _isAuth(false), _isDead(false) {}
 
 Client::~Client() {}
 
@@ -19,13 +20,12 @@ void	Client::parseDataClient()
 	ssize_t bytes = recv(_fd, buffer, sizeof(buffer) - 1 , 0);
 	line += buffer;
 	if (line.empty() || bytes == -1)
-	{
-		std::cout << "Client <" << _fd << "> Disconnected" << std::endl;
-		Server::getInstance().removeClient(_fd);
-		return;
-	}
+		return Server::getInstance().removeClient(_fd);
 	
 	// check if in list
+	if (Server::getInstance().isClient(_nickname) == false || _isDead)
+		return Server::getInstance().removeClient(_fd);
+
 	size_t pos;
 	std::string lineRead;
 	do
@@ -68,8 +68,6 @@ std::string Client::ft_trim(const std::string &str)
 	return (end == std::string::npos) ? "" : str.substr(0, end + 1);
 }
 
-// remove if possible
-
 const std::string	&Client::get_host() const { return _host; };
 const std::string	&Client::get_nickname() const { return _nickname; }
 void				Client::set_nickname(const std::string &nickname) { _nickname = nickname; }
@@ -77,8 +75,8 @@ const std::string	&Client::get_mask() const { return _mask; }
 void				Client::set_mask() { _mask = ":" + _nickname + "!" + _username + "@" + _host; }
 bool		Client::get_isAuth() const { return _isAuth; }
 void		Client::set_isAuth() { _isAuth = true;}
-bool		Client::get_isRegistered() const { return _isRegistered; }
-void		Client::set_isRegistered() { _isRegistered = true; }
+// bool		Client::get_isRegistered() const { return _isRegistered; }
+// void		Client::set_isRegistered() { _isRegistered = true; }
 void		Client::set_isDead() { _isDead = true; }
 bool		Client::get_isDead() const { return _isDead; }
 int			Client::get_fd() const { return _fd; }

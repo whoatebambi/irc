@@ -48,7 +48,7 @@ void	Channel::partChannel(Client *client, const std::string &msgPart)
 	else
 		Reply::sendBroadcast(generateMembersFd(), client, " PART " + _name + " :" + msgPart);
 	this->_memberSet.erase(client);
-	this->_operatorSet.erase(client);
+	// this->_operatorSet.erase(client);
 }
 
 // Kick command
@@ -70,9 +70,10 @@ Channel*	Channel::findChannel(std::string target)
 std::string	Channel::generateMembersNick() const
 {
 	std::string str;
+	str += " :";
 	for (std::set<Client*>::const_iterator it = _memberSet.begin(); it != _memberSet.end(); ++it)
 	{
-		str += " :";
+		str += " ";
 		if (isOperator(*it))
 			str += "@";
 		str += (*it)->get_nickname();

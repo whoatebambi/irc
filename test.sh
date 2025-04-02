@@ -5,34 +5,43 @@ HOST="127.0.0.1"
 PORT="6667"
 
 {
-  echo -ne "CAP LS\r\n"
-  sleep 0.2
+	echo -ne "CAP LS\r\n"
+	sleep 0.2
 
-  echo -ne "PASS 1234\r\n"
-  sleep 0.2
+	echo -ne "PASS 123\r\n"
+	sleep 0.2
 
-  echo -ne "NICK flo\r\n"
-  sleep 0.2
+	echo -ne "PASS 1234\r\n"
+	sleep 0.2
 
-  echo -ne "USER florencecousergue florencecousergue 127.0.0.1 :Florence Cousergue\r\n"
-  sleep 0.2
+	echo -ne "NICK flo\r\n"
+	sleep 0.2
 
-  echo -ne "CAP END\r\n"
-  sleep 0.2
+	echo -ne "USER florencecousergue florencecousergue 127.0.0.1 :Florence Cousergue\r\n"
+	sleep 0.2
 
-  echo -ne "MODE flo +i\r\n"
-  sleep 0.2
+	echo -ne "CAP END\r\n"
+	sleep 0.2
 
-  echo -ne "PING Jean-Claude\r\n"
-  sleep 0.2
+	echo -ne "MODE flo +i\r\n"
+	sleep 0.2
 
-  echo -ne "JOIN #test\r\n"
-  sleep 0.2
+	echo -ne "PING Jean-Claude\r\n"
+	sleep 0.2
 
-  echo -ne "PRIVMSG #test :Hello from script!\r\n"
-  sleep 0.2
+	#   echo -ne "JOIN #test\r\n"
+	#   sleep 0.2
 
-  echo -ne "QUIT :bye\r\n"
+	#   echo -ne "JOIN #test\r\n"
+	#   sleep 0.2
+
+	#   echo -ne "JOIN test\r\n"
+	#   sleep 0.2
+
+	#   echo -ne "PRIVMSG #test :Hello from script!\r\n"
+	#   sleep 0.2
+
+	echo -ne "QUIT :bye\r\n"
 } | nc $HOST $PORT
 
 

@@ -68,5 +68,7 @@ void	handlePrivateMsg(const std::string &target, const std::string &msgArg, Clie
 	if (!receiver)
 		return (Reply::sendNumReply(client, ERR_NOSUCHNICK, target));
 
-	Reply::sendNumReply(receiver, RPL_AWAY, "PRIVMSG", target + " " + msgArg);
+	std::string msgFull = client->get_mask() + " PRIVMSG " + target + " :" + msgArg + "\r\n";
+	std::cout << INVERSE_BG << RED << ">>> " << BOLD << " to fd<" << receiver->get_fd() << "> " << msgFull << RESET ;
+	send(receiver->get_fd(), msgFull.c_str(), msgFull.size(), MSG_NOSIGNAL);
 }

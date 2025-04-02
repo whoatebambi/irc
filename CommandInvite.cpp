@@ -22,7 +22,7 @@ void CommandInvite::execute(const std::string &args, Client *client)
 		return (Reply::sendNumReply(client, ERR_CHANOPRIVSNEEDED, channelName));
 
 	Client *invitee = Server::getInstance().get_client(nickname);
-	if (!invitee || !invitee->get_isRegistered())
+	if (!invitee || !invitee->get_isAuth())
 		return (Reply::sendNumReply(client, ERR_NOSUCHNICK, nickname));
 	if (channel->isInChannel(invitee))
 		return (Reply::sendNumReply(client, ERR_USERONCHANNEL, nickname, channelName));

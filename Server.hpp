@@ -99,7 +99,7 @@ class Server
 		
 		// Clients and channels setters/getters
 		bool	isClient(const std::string &nickname) const;
-		bool	isRegisteredClient(const std::string &nickname) const;
+		bool	isExistingNickname(const std::string &args) const;
 		Client	*get_client(const std::string &nickname);
 		std::set<int>	getSharedMembersFd(Client *client);
 		const std::vector<Client*>	&get_clientVec() const;

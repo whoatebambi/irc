@@ -6,17 +6,10 @@ void CommandNick::execute(const std::string &args, Client *client)
 	if (args.empty())
 		return (Reply::sendNumReply(client, ERR_NONICKNAMEGIVEN));
 
-	if (!client->get_isAuth())
-	{
-		client->set_isDead();
-		std::cout << "Client <" << client->get_fd() << "> flagged as DEAD during NICK" << std::endl;
-		return;
-	}
-
-	if (!isValidNick(args))
+	if (!isValidNick(args)) 
 		return (Reply::sendNumReply(client, ERR_ERRONEUSNICKNAME, args));
 
-	if (Server::getInstance().isClient(args) && client->get_nickname() == args) // to test
+	if (Server::getInstance().isExistingNickname(args) == true)
 		return Reply::sendNumReply(client, ERR_NICKNAMEINUSE, args);
 
 	std::string oldMask = client->get_mask();
@@ -31,12 +24,15 @@ void CommandNick::execute(const std::string &args, Client *client)
 		if (channel->isInChannel(client))
 		{
 			const std::set<int> &fds = channel->generateMembersFd();
-			broadcastFds.insert(fds.begin(), fds.end()); // merge into set (no duplicates)
+			broadcastFds.insert(fds.begin(), fds.end());
 		}
 	}
-	// if (it == channelSet.end())
-		// need to handle this case? 
-	std::string msg = oldMask + " " + "NICK :" + client->get_nickname() + "\r\n";
+
+	std::string msg;
+	if (oldMask.empty())
+		oldMask = ":" + client->get_nickname() + "!" + client->get_username() + "@" + client->get_host(); 
+	msg = oldMask + " " + "NICK :" + client->get_nickname() + "\r\n";
+	
 	if (broadcastFds.empty())
 	{
 		send(client->get_fd(), msg.c_str(), msg.size(), MSG_NOSIGNAL);

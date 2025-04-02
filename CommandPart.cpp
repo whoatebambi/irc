@@ -37,7 +37,7 @@ void CommandPart::execute(const std::string &args, Client *client)
 			Reply::sendNumReply(client, ERR_NOTONCHANNEL, channelName);
 			continue;
 		}
-		channel->partChannel(client, partMsg); // This should do the broadcasting + removal
+		channel->partChannel(client, partMsg);
 		if (channel->get_memberSet().size() == 0)
 			Server::getInstance().removeChannel(channel);
 	}

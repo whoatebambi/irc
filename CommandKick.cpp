@@ -50,5 +50,5 @@ void	performKick(Channel *channel, Client *client, Client *toKick, const std::st
 	channel->removeMember(toKick);
 	channel->removeOperator(toKick);
 	channel->removeInvite(toKick);
-	Reply::sendNumReply(toKick, ERR_NOTONCHANNEL, channel->get_name()); // Test if ERR_NOTONCHANNELcloses the channel UI of the kicked user
+	// Reply::sendNumReply(toKick, ERR_NOTONCHANNEL, channel->get_name()); // Test if ERR_NOTONCHANNELcloses the channel UI of the kicked user
 }

@@ -203,8 +203,7 @@ int Server::acceptSocketClient()
 void Server::createAndStoreClient(int clientFd)
 {
 	std::string host = inet_ntoa(_cliadd.sin_addr);
-	int port = ntohs(_cliadd.sin_port);
-	Client* clientObject = new Client(clientFd, host, port);
+	Client* clientObject = new Client(clientFd, host);
 	_clientVec.push_back(clientObject);
 	std::cout << "Client <" << clientFd << "> Connected" << std::endl;
 }
@@ -213,15 +212,15 @@ void Server::handleDataClient(int fd)
 {
 	for (size_t j = 0; j < _clientVec.size(); ++j)
 	{
-		// if (_clientVec[j] == NULL)
-		// 	continue;
 		if (_clientVec[j]->get_fd() == fd)
 		{
 			_clientVec[j]->parseDataClient();
-			// if (_clientVec[j]->get_isDead() == true)
+			// if (_clientVec[j] && _clientVec[j]->get_isDead())
+			// {
 			// 	std::cout << "_clientVec[j]->get_isDead() == true" << std::endl;
 			// 	Server::getInstance().removeClient(_clientVec[j]->get_fd());
-			break;
+			// 	return;
+			// }
 		}
 	}
 }
@@ -237,8 +236,8 @@ void Server::addChannel(Client *client, const std::string &name, const std::stri
 void Server::removeChannel(Channel *channel)
 {
 	std::cout << "Channel #" << channel->get_name() << " deleted.\n";
-	_channelSet.erase(channel); // remove pointer from Server's set
-	delete (channel); // this will destroy the channel but not the clients in the lists)
+	_channelSet.erase(channel);
+	delete (channel);
 }
 
 void Server::removeClient(int fd)
@@ -259,7 +258,7 @@ void Server::removeClient(int fd)
 				// if (channel->get_memberSet().size() == 0)
 				// 	removeChannel(channel);
 			}
-			std::cout << "Client <" << client->get_fd() << ">" << " deleted.\n";
+			std::cout << "Client <" << client->get_fd() << "> disconnected" << std::endl;
 			_poller->unregisterFd(fd);
 			close(fd);
 			delete (client);
@@ -279,10 +278,10 @@ bool	Server::isClient(const std::string &nickname) const
 	return (false);
 }
 
-bool	Server::isRegisteredClient(const std::string &nickname) const
+bool	Server::isExistingNickname(const std::string &nickname) const
 {
 	for (size_t i = 0; i < _clientVec.size(); ++i)
-		if (_clientVec[i]->get_nickname() == nickname && _clientVec[i]->get_isRegistered())
+		if (_clientVec[i]->get_nickname() == nickname)// && _clientVec[i]->get_isRegistered())
 			return (true);
 	return (false);
 }

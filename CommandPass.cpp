@@ -9,7 +9,6 @@ void CommandPass::execute(const std::string &args, Client *client)
 		return (Reply::sendNumReply(client, ERR_ALREADYREGISTRED));
 	if (args != (Server::getInstance().get_password()))
 	{
-		// Server::getInstance().removeClient(client->get_fd());
 		client->set_isDead();
 		std::cout << "Client <" << client->get_fd() << "> flagged as DEAD during PASS" << std::endl;
 		return;
