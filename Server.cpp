@@ -8,21 +8,18 @@ Server::~Server()
 	close(_fd);
 
 	for (size_t i = 0; i < _clientVec.size(); ++i)
-	{
-		// removeClient(_clientVec[i]->get_fd());
     	delete _clientVec[i];
-	}
 	_clientVec.clear();
 
 	std::vector<Channel*> channelsToDelete(_channelSet.begin(), _channelSet.end());
 	for (size_t i = 0; i < channelsToDelete.size(); ++i)
 		removeChannel(channelsToDelete[i]);
-	_channelSet.clear(); // not strictly needed, but safe to keep
+	_channelSet.clear();
 
 	for (std::map<std::string, Command*>::iterator it = _commandMap.begin(); it != _commandMap.end(); )
 	{
 		delete (it->second);
-		_commandMap.erase(it++); // increment *after* erasing
+		_commandMap.erase(it++);
 	}
 	_commandMap.clear();
 	delete _poller;
@@ -40,11 +37,7 @@ void Server::init(const std::string &port, const std::string &password)
 {
 	_running = true;
 	_port = atoi(port.c_str());
-	if (_port < MIN_PORT || _port > MAX_PORT)
-		throw std::runtime_error("Invalid port: must be between 1024 and 65535");
 	_password = password;
-	if (!isValidKeyString(_password))
-		throw std::runtime_error("Invalid password");
 
 	createServerSocket();
 	bindAndListen();
@@ -115,6 +108,7 @@ void Server::initCommandMap()
 }
 
 // Closing functions
+
 void Server::shutdown() { _running = false; }
 
 void Server::closeFds()
@@ -316,3 +310,19 @@ std::set<int> Server::getSharedMembersFd(Client *client)
 
 const std::vector<Client*>	&Server::get_clientVec() const { return _clientVec; }
 const std::set<Channel*>	&Server::get_channelSet() const { return _channelSet; }
+
+
+bool	isValidPasword(const std::string &password)
+{
+	if (password.length() < 3 || password.length() > 32)
+		return (false);
+
+	for (size_t i = 0; i < password.length(); ++i)
+	{
+		if (!std::isprint(password[i]))  // control characters
+			return (false);
+		if (password[i] == ' ')
+			return (false);
+	}
+	return (true);
+}

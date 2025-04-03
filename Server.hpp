@@ -43,6 +43,9 @@
 #define INVERSE_BG "\033[7;49m"
 #define BOLD "\033[1m"
 
+#define MIN_PORT 1024
+#define MAX_PORT 65535
+
 class Client;
 class Channel;
 
@@ -60,9 +63,6 @@ class Server
 		struct sockaddr_in	_cliadd;
 		std::vector<Client*>	_clientVec;
 		std::set<Channel*>		_channelSet;
-
-		static const int MIN_PORT = 1024;
-		static const int MAX_PORT = 65535;
 
 	public:
 		// Initialize the server
@@ -105,3 +105,5 @@ class Server
 		const std::vector<Client*>	&get_clientVec() const;
 		const std::set<Channel*>	&get_channelSet() const;
 };
+
+bool	isValidPasword(const std::string &password);

@@ -14,6 +14,7 @@ void	Client::parseDataClient()
 		line += _saved;
 		_saved.clear();
 	}
+	// std::cout << "received:: " <<  _saved << std::endl;
 
 	char buffer[BUFFER_SIZE];
 	memset(buffer, 0, sizeof(buffer));
@@ -75,8 +76,6 @@ const std::string	&Client::get_mask() const { return _mask; }
 void				Client::set_mask() { _mask = ":" + _nickname + "!" + _username + "@" + _host; }
 bool		Client::get_isAuth() const { return _isAuth; }
 void		Client::set_isAuth() { _isAuth = true;}
-// bool		Client::get_isRegistered() const { return _isRegistered; }
-// void		Client::set_isRegistered() { _isRegistered = true; }
 void		Client::set_isDead() { _isDead = true; }
 bool		Client::get_isDead() const { return _isDead; }
 int			Client::get_fd() const { return _fd; }

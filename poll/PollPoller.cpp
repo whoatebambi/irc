@@ -6,7 +6,6 @@ PollPoller::~PollPoller() {}
 
 bool PollPoller::add(int fd)
 {
-	// Prevent duplicates
 	if (_fdIndexMap.find(fd) != _fdIndexMap.end())
 		return false;
 

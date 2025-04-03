@@ -20,7 +20,6 @@ class Client
 		std::string	_host;
 		std::string	_saved;
 		bool 		_isAuth;
-		// bool 		_isRegistered; // after PASS, NICK, USER commands, check if useful
 		bool		_isDead;
 		std::string	_nickname;
 		std::string	_username;
@@ -41,8 +40,6 @@ class Client
 		const std::string	&get_host() const;
 		void 		set_isAuth();
 		bool 		get_isAuth() const;
-		// void		set_isRegistered();
-		// bool		get_isRegistered() const;
 		void		set_isDead();
 		bool		get_isDead() const;
 		const std::string	&get_nickname() const;

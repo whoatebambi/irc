@@ -1,7 +1,7 @@
 #ifdef __linux__
 
 #include "EpollPoller.hpp"
-#include <cstdio> // For perror
+#include <cstdio>
 
 EpollPoller::EpollPoller()
 {
@@ -10,10 +10,7 @@ EpollPoller::EpollPoller()
 		throw std::runtime_error("epoll_create1() failed");
 }
 
-EpollPoller::~EpollPoller()
-{
-	close(_epollFd);
-}
+EpollPoller::~EpollPoller() { close(_epollFd); }
 
 bool EpollPoller::add(int fd)
 {
@@ -23,17 +20,12 @@ bool EpollPoller::add(int fd)
 	return epoll_ctl(_epollFd, EPOLL_CTL_ADD, fd, &event) != -1;
 }
 
-bool EpollPoller::remove(int fd)
-{
-	return epoll_ctl(_epollFd, EPOLL_CTL_DEL, fd, NULL) != -1;
-}
+bool EpollPoller::remove(int fd) { return epoll_ctl(_epollFd, EPOLL_CTL_DEL, fd, NULL) != -1; }
 
 void EpollPoller::unregisterFd(int fd)
 {
 	if (epoll_ctl(this->_epollFd, EPOLL_CTL_DEL, fd, NULL) == -1)
-	{
 		perror("epoll_ctl: EPOLL_CTL_DEL");
-	}
 }
 
 int EpollPoller::wait(PollEvent* outEvents, int maxEvents, int timeout)
@@ -54,9 +46,6 @@ int EpollPoller::wait(PollEvent* outEvents, int maxEvents, int timeout)
 	return count;
 }
 
-int EpollPoller::getFd() const
-{
-	return _epollFd;
-}
+int EpollPoller::getFd() const { return _epollFd; }
 
-#endif // __linux__
+#endif
