@@ -43,6 +43,8 @@ void Server::init(const std::string &port, const std::string &password)
 	if (_port < MIN_PORT || _port > MAX_PORT)
 		throw std::runtime_error("Invalid port: must be between 1024 and 65535");
 	_password = password;
+	if (!isValidKeyString(_password))
+		throw std::runtime_error("Invalid password");
 
 	createServerSocket();
 	bindAndListen();

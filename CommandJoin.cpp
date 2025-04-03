@@ -46,7 +46,7 @@ std::map<std::string, std::string> CommandJoin::parseArgs(const std::string &arg
 	if (argsVector.size() == 2)
 	{
 		keyVector = splitString(argsVector[1], ',');
-		replaceDefaultKey(keyVector); // Handle irssi sending key = "x"
+		// replaceDefaultKey(keyVector); // Handle irssi sending key = "x"
 	}
 
 	for (size_t i = 0; i < channelVector.size(); ++i)
@@ -83,21 +83,21 @@ bool sameString(const std::string &s1, const std::string &s2)
 }
 
 // Handles IRSSI behaviour that sends key = "x" instead of key = ""
-void replaceDefaultKey(std::vector<std::string> &keys)
-{
-	for (size_t i = 0; i < keys.size(); ++i)
-	{
-		if (keys[i] == "x") {
-			keys[i] = "";
-		}
-	}
-}
+// void replaceDefaultKey(std::vector<std::string> &keys)
+// {
+// 	for (size_t i = 0; i < keys.size(); ++i)
+// 	{
+// 		if (keys[i] == "x") {
+// 			keys[i] = "";
+// 		}
+// 	}
+// }
 
 bool	isValidKeyString(const std::string &key)
 {
 	// Used for replaceDefaultKey()
-	if (key.empty())
-		return (true);
+	// if (key.empty())
+	// 	return (true);
 
 	if (key.length() < 3 || key.length() > 32)
 		return (false);

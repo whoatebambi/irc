@@ -7,8 +7,8 @@ FLAG		=	-Wall -Wextra -Werror -std=c++98 -Ipoll
 
 # Settings for florencecousergue macOS
 ifeq ($(UNAME_S), Darwin)
-CC			=	/opt/homebrew/Cellar/gcc/14.2.0_1/bin/g++-14
-FLAG		=	-Wall -Wextra -Werror -std=c++98 -I/usr/local/include -L/usr/local/lib -Ipoll
+CC		=	c++
+FLAG	=	-Wall -Wextra -Werror -std=c++98 -Ipoll
 endif
 
 C_FILES		=	main.cpp Client.cpp Server.cpp Channel.cpp Command.cpp Reply.cpp \

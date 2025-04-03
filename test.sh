@@ -8,6 +8,7 @@ PORT="6667"
 	echo -ne "CAP LS\r\n"
 	sleep 0.2
 
+#issue with reconnecting with same client after failed password
 	echo -ne "PASS 123\r\n"
 	sleep 0.2
 
